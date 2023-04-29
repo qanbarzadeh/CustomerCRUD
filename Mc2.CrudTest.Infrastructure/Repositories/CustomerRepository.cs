@@ -12,15 +12,30 @@ namespace Mc2.CrudTest.Infrastructure.Repositories
 {
     public class CustomerRepository : ICustomerRepository
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly ApplicationDbContext _context;
 
         public CustomerRepository(ApplicationDbContext dbContext)
         {
-            _dbContext = dbContext;
+            _context = dbContext;
         }
-        public Task AddAsync(Customer customer)
+        public async  Task AddAsync(Customer customer)
         {
-            throw new NotImplementedException();
+            if (customer == null)
+            {
+                throw new ArgumentNullException(nameof(customer));
+            }
+
+            try
+            {
+                await _context.Customers.AddAsync(customer);
+            }
+            catch (Exception ex)
+            {
+                // You can log the exception here if you want.
+                throw new InvalidOperationException("An error occurred while adding the customer.", ex);
+            }
+
+
         }
 
         public Task DeleteAsync(int id)
@@ -30,7 +45,7 @@ namespace Mc2.CrudTest.Infrastructure.Repositories
 
         public async Task<IEnumerable<Customer>> GetAllAsync()
         {
-            return  await _dbContext.Customers.ToListAsync();
+            return  await _context.Customers.ToListAsync();
         }
 
         public Task<Customer> GetByIdAsync(int id)
