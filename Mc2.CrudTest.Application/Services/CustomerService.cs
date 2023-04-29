@@ -1,4 +1,5 @@
-﻿using Mc2.CrudTest.Application.DTO;
+﻿using AutoMapper;
+using Mc2.CrudTest.Application.DTO;
 using Mc2.CrudTest.Application.Interfaces;
 using Mc2.CrudTest.Application.Repositories;
 using Mc2.CrudTest.Domain.Entities;
@@ -13,10 +14,12 @@ namespace Mc2.CrudTest.Application.Services
     public class CustomerService : ICustomerService
     {
         private readonly ICustomerRepository _customerRepository;
+        private readonly IMapper _mapper; 
 
-        public CustomerService(ICustomerRepository customerRepository)
+        public CustomerService(IMapper mapper , ICustomerRepository customerRepository)
         {
             _customerRepository = customerRepository;
+            _mapper = mapper;
         }
 
         public Task AddCustomer(CustomerDTO customerDto)
@@ -29,10 +32,35 @@ namespace Mc2.CrudTest.Application.Services
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<CustomerDTO>> GetAllCustomers()
+        public async Task<IEnumerable<CustomerDTO>> GetAllCustomers()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var customers = await _customerRepository.GetAllAsync();
+
+                if (customers == null)
+                {
+                    throw new Exception("No customers found");
+                }
+
+                var config = new MapperConfiguration(cfg =>
+                {
+                    cfg.CreateMap<Customer, CustomerDTO>();
+                });
+
+                IMapper mapper = config.CreateMapper();
+                var customerDtos = mapper.Map<IEnumerable<CustomerDTO>>(customers);
+
+                return customerDtos;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                // Handle the exception gracefully, for example, by returning a default value or an error message
+                throw ex;
+            }
         }
+
 
         public async Task<CustomerDTO> GetCustomerById(int id)
         {
