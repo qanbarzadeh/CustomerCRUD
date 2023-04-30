@@ -116,11 +116,50 @@ namespace Mc2.CrudTest.Application.Services
             return customerDto;
         }
 
-        public Task UpdateCustomer(int id, CustomerDTO customerDto)
+        public async Task UpdateCustomer(int id, CustomerDTO customerDto)
         {
-            throw new NotImplementedException();
+            if (customerDto == null)
+            {
+                throw new ArgumentNullException(nameof(customerDto));
+            }
+
+            var customer = await _customerRepository.GetByIdAsync(id);
+            if (customer == null)
+            {
+                throw new ArgumentException($"Customer with ID {id} not found");
+            }
+
+            // Validate the phone number
+            if (!ValidationUtility.IsValidPhoneNumber(customerDto.PhoneNumber))
+            {
+                throw new ArgumentException("Invalid phone number");
+            }
+
+            // Validate the email
+            if (!ValidationUtility.IsValidEmail(customerDto.Email))
+            {
+                throw new ArgumentException("Invalid email");
+            }
+
+          
+
+            // Validate the bank account number
+            if (!ValidationUtility.IsValidBankAccountNumber(customerDto.BankAccountNumber))
+            {
+                throw new ArgumentException("Invalid bank account number");
+            }
+
+            // Update the customer properties
+            customer.Firstname = customerDto.Firstname;
+            customer.Lastname = customerDto.Lastname;
+            customer.DateOfBirth = customerDto.DateOfBirth;
+            customer.PhoneNumber = customerDto.PhoneNumber;
+            customer.Email = customerDto.Email;
+            customer.BankAccountNumber = customerDto.BankAccountNumber;
+
+            // Save the changes
+            await _customerRepository.UpdateAsync(customer);
         }
 
-      
     }
 }

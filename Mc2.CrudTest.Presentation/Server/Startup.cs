@@ -7,6 +7,12 @@ using AutoMapper;
 using Mc2.CrudTest.Application.Mapping;
 using Mc2.CrudTest.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Swagger;
+using Mc2.CrudTest.Application.Repositories;
+using Mc2.CrudTest.Infrastructure.Repositories;
+using Mc2.CrudTest.Application.Interfaces;
+using Mc2.CrudTest.Application.Services;
 
 namespace Mc2.CrudTest.Presentation.Server
 {
@@ -23,6 +29,14 @@ namespace Mc2.CrudTest.Presentation.Server
         public void ConfigureServices(IServiceCollection services)
         {
 
+            services.AddScoped<ICustomerRepository, CustomerRepository>();
+            services.AddScoped<ICustomerService, CustomerService>();
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "CustomerCRUD", Version = "v1" });
+            });
+
             services.AddControllersWithViews();
             var mapperConfig = new MapperConfiguration(mc =>
             {
@@ -36,35 +50,40 @@ namespace Mc2.CrudTest.Presentation.Server
             IMapper mapper = mapperConfig.CreateMapper();
             services.AddSingleton(mapper);
             services.AddRazorPages();
-        }
 
-        
+          
+        }
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                    c.RoutePrefix = "swagger";
+                });
                 app.UseDeveloperExceptionPage();
-                app.UseWebAssemblyDebugging();
             }
             else
             {
                 app.UseExceptionHandler("/Error");
-                
                 app.UseHsts();
             }
 
             app.UseHttpsRedirection();
-            app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
 
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapRazorPages();
                 endpoints.MapControllers();
-                endpoints.MapFallbackToFile("index.html");
             });
         }
+
+
+
+
     }
 }
