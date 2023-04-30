@@ -38,10 +38,34 @@ namespace Mc2.CrudTest.Infrastructure.Repositories
 
         }
 
-        public Task DeleteAsync(int id)
+        public async Task DeleteAsync(int id)
         {
-            throw new NotImplementedException();
+            var customer = new Customer { Id = id };
+
+            // Attach the customer to the context with the EntityState as 'Deleted'
+            _context.Entry(customer).State = EntityState.Deleted;
+
+            try
+            {
+                // Save changes to the database
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                // Check if the customer exists
+                var existingCustomer = await _context.Customers.FindAsync(id);
+
+                if (existingCustomer == null)
+                {
+                    throw new ArgumentException($"Customer with id {id} not found");
+                }
+                else
+                {
+                    throw;
+                }
+            }
         }
+
 
         public async Task<IEnumerable<Customer>> GetAllAsync()
         {
