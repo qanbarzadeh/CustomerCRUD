@@ -58,9 +58,16 @@ namespace Mc2.CrudTest.Application.Services
 
       
 
-        public Task DeleteCustomer(int id)
+        public async Task DeleteCustomer(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await _customerRepository.DeleteAsync(id);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ArgumentException($"Could not delete customer with ID {id}.", ex);
+            }
         }
 
         public async Task<IEnumerable<CustomerDTO>> GetAllCustomers()
