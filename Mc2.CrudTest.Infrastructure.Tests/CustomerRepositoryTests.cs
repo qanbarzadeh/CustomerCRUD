@@ -109,7 +109,7 @@ namespace Mc2.CrudTest.Infrastructure.Tests
                 firstname: "Sara",
                 lastname: "White",
                 dateOfBirth: new DateTime(1990, 1, 1),
-                phoneNumber: "123asdfas",
+                phoneNumber: "060173771596",
                 email: "saraw@gmail.com",
                 bankAccountNumber: "123-456-789")
             {
@@ -151,8 +151,44 @@ namespace Mc2.CrudTest.Infrastructure.Tests
                 Assert.Equal($"Customer with ID {id} not found", ex.Message);
             }
         }
+        [Fact]
+        public async Task UpdateAsync_WithValidCustomer_ShouldUpdateCustomerInDatabase()
+        {
+            // Arrange
+            int id = 1;
+            var customer = new Customer(
+                firstname: "Sara",
+                lastname: "White",
+                dateOfBirth: new DateTime(1990, 1, 1),
+                phoneNumber: "060173771596",
+                email: "saraw@gmail.com",
+                bankAccountNumber: "123-456-789")
+            {
+                Id = id
+            };
+            using (var context = new ApplicationDbContext(_options))
+            {
+                await context.Customers.AddAsync(customer);
+                await context.SaveChangesAsync();
+            }
 
+            // Act
+            using (var context = new ApplicationDbContext(_options))
+            {
+                var customerRepository = new CustomerRepository(context);
 
+                customer.Firstname = "Changed";
+                await customerRepository.UpdateAsync(customer);
+                await context.SaveChangesAsync();
+            }
+
+            // Assert
+            using (var context = new ApplicationDbContext(_options))
+            {
+                var updatedCustomer = await context.Customers.FindAsync(id);
+                Assert.Equal("Changed", updatedCustomer.Firstname);
+            }
+        }
 
     }
 }

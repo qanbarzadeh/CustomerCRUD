@@ -96,11 +96,28 @@ namespace Mc2.CrudTest.Infrastructure.Repositories
             }
         }
 
-
-
-        public Task UpdateAsync(Customer customer)
+        public async Task UpdateAsync(Customer customer)
         {
-            throw new NotImplementedException();
+            if (customer == null)
+            {
+                throw new ArgumentNullException(nameof(customer));
+            }
+
+            try
+            {
+                _context.Customers.Update(customer);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+             
+                throw new InvalidOperationException($"Could not update customer with ID {customer.Id}", ex);
+            }
+            catch (Exception ex)
+            {
+             
+                throw ex;
+            }
         }
     }
 }
