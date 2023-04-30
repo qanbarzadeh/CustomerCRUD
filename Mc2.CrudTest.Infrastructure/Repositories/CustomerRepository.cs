@@ -2,21 +2,19 @@
 using Mc2.CrudTest.Domain.Entities;
 using Mc2.CrudTest.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Mc2.CrudTest.Infrastructure.Repositories
 {
     public class CustomerRepository : ICustomerRepository
     {
         private readonly ApplicationDbContext _context;
+        
 
         public CustomerRepository(ApplicationDbContext dbContext)
         {
             _context = dbContext;
+            
         }
         public async  Task AddAsync(Customer customer)
         {

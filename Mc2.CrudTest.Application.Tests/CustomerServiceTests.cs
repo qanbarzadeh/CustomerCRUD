@@ -1,11 +1,9 @@
 ﻿
 using AutoMapper;
-using Castle.Core.Resource;
 using Mc2.CrudTest.Application.DTO;
 using Mc2.CrudTest.Application.Repositories;
 using Mc2.CrudTest.Application.Services;
 using Mc2.CrudTest.Domain.Entities;
-using Mc2.CrudTest.Infrastructure;
 using Mc2.CrudTest.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Moq;
@@ -17,6 +15,7 @@ namespace Mc2.CrudTest.Application.Tests
     public class CustomerServiceTests
     {
         private readonly IMapper _mapper;
+        private readonly DbContextOptions<Infrastructure.Data.ApplicationDbContext> _dbContextOptions;
 
         public CustomerServiceTests()
         {
@@ -24,8 +23,11 @@ namespace Mc2.CrudTest.Application.Tests
             {
                 cfg.CreateMap<Customer, CustomerDTO>();
             });
-
             _mapper = config.CreateMapper();
+
+            _dbContextOptions = new DbContextOptionsBuilder<Infrastructure.Data.ApplicationDbContext>()
+                .UseInMemoryDatabase(databaseName: "TestDatabase")
+                .Options;
         }
         [Fact]
         public async Task GetCustomerById_WithValidId_ReturnsCustomerDto()
@@ -45,7 +47,7 @@ namespace Mc2.CrudTest.Application.Tests
 
             var mockMapper = new Mock<IMapper>();
             var mockRepository = new Mock<ICustomerRepository>();
-            mockRepository.Setup(repo => repo.GetByIdAsync(id)).ReturnsAsync(expectedCustomer);            
+            mockRepository.Setup(repo => repo.GetByIdAsync(id)).ReturnsAsync(expectedCustomer);
             var customerService = new CustomerService(mockMapper.Object, mockRepository.Object);
             // Act
             var actualCustomer = await customerService.GetCustomerById(id);
@@ -116,7 +118,7 @@ namespace Mc2.CrudTest.Application.Tests
                 .Returns((Customer source) => expectedCustomerDTOs.Single(dto => dto.Id == source.Id));
 
             var mockRepository = new Mock<ICustomerRepository>();
-            mockRepository.Setup(repo => repo.GetAllAsync()).ReturnsAsync(expectedCustomers);            
+            mockRepository.Setup(repo => repo.GetAllAsync()).ReturnsAsync(expectedCustomers);
             var customerService = new CustomerService(mockMapper.Object, mockRepository.Object);
 
             // Act
@@ -157,7 +159,7 @@ namespace Mc2.CrudTest.Application.Tests
                 dto.BankAccountNumber
             ));
 
-            
+
             var customerService = new CustomerService(mockMapper.Object, mockCustomerRepository.Object);
 
             // Act
@@ -184,7 +186,7 @@ namespace Mc2.CrudTest.Application.Tests
 
             var mockMapper = new Mock<IMapper>();
             var mockCustomerRepository = new Mock<ICustomerRepository>();
-            
+
             var customerService = new CustomerService(mockMapper.Object, mockCustomerRepository.Object);
 
             // Act & Assert
@@ -199,7 +201,7 @@ namespace Mc2.CrudTest.Application.Tests
             {
                 Firstname = "alireza",
                 Lastname = "Q",
-                DateOfBirth = new DateTime(1984,1,1),
+                DateOfBirth = new DateTime(1984, 1, 1),
                 PhoneNumber = "123-456-7890",
                 Email = "invalid email address",
                 BankAccountNumber = "123-456-789"
@@ -217,33 +219,28 @@ namespace Mc2.CrudTest.Application.Tests
         public async Task AddCustomer_WithInvalidBankAccountNumber_ShouldThrowArgumentException()
         {
             // Arrange
-            var customerDto = new CustomerDTO
+            var customerDto = CreateCustomerDto();
+
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(databaseName: "TestDb")
+                .Options;
+
+            using (var context = new ApplicationDbContext(options))
             {
-                Firstname = "alireza",
-                Lastname = "Qanbarzadeh",
-                DateOfBirth = new DateTime(1984, 1, 1),
-                PhoneNumber = "+60173771596",
-                Email = "ghxalireza@gmail.com",
-                BankAccountNumber = "S500invalid"
-            };
+                await context.Customers.AddAsync(new Customer("Test", "User", new DateTime(1990, 1, 1), "+60123456789", "testuser@example.com", "S500valid"));
+                await context.SaveChangesAsync();
 
-            var mockCustomerRepository = new Mock<ICustomerRepository>();
-            var mockMapper = new Mock<IMapper>();
-            mockMapper.Setup(m => m.Map<Customer>(It.IsAny<CustomerDTO>())).Returns<CustomerDTO>(dto => new Customer(
-                dto.Firstname,
-                dto.Lastname,
-                dto.DateOfBirth,
-                dto.PhoneNumber,
-                dto.Email,
-                dto.BankAccountNumber
-            ));
-            var customerService = new CustomerService(mockMapper.Object, mockCustomerRepository.Object);
+                var mockCustomerRepository = new Mock<ICustomerRepository>();
+                mockCustomerRepository.Setup(repo => repo.IsEmailUniqueAsync(It.IsAny<string>())).ReturnsAsync(true);
 
-            // Act
-            var ex = await Assert.ThrowsAsync<ArgumentException>(() => customerService.AddCustomer(customerDto));
+                var customerService = new CustomerService(_mapper, mockCustomerRepository.Object);
 
-            // Assert
-            Assert.Equal("Invalid bank account number", ex.Message);
+                // Act
+                var ex = await Assert.ThrowsAsync<ArgumentException>(() => customerService.AddCustomer(customerDto));
+
+                // Assert
+                Assert.Equal("Invalid bank account number", ex.Message);
+            }
         }
 
         [Fact]
@@ -285,7 +282,18 @@ namespace Mc2.CrudTest.Application.Tests
 
         }
 
+        private static CustomerDTO CreateCustomerDto()
+        {
+            return new CustomerDTO
+            {
+                Firstname = "alireza",
+                Lastname = "Qanbarzadeh",
+                DateOfBirth = new DateTime(1984, 1, 1),
+                PhoneNumber = "+60173771596",
+                Email = "areza@gmail.com",
+                BankAccountNumber = "S500invalid"
+            };
 
-
+        }
     }
 }
