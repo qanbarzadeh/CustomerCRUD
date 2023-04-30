@@ -3,6 +3,7 @@ using Mc2.CrudTest.Application.DTO;
 using Mc2.CrudTest.Application.Interfaces;
 using Mc2.CrudTest.Application.Repositories;
 using Mc2.CrudTest.Domain.Entities;
+using Mc2.CrudTest.Shared.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,10 +23,24 @@ namespace Mc2.CrudTest.Application.Services
             _mapper = mapper;
         }
 
-        public Task AddCustomer(CustomerDTO customerDto)
+        public async Task AddCustomer(CustomerDTO customerDto)
         {
-            throw new NotImplementedException();
+            if (customerDto == null)
+            {
+                throw new ArgumentNullException(nameof(customerDto));
+            }
+
+            // Validate the phone number
+            if (!ValidationUtility.IsValidPhoneNumber(customerDto.PhoneNumber))
+            {
+                throw new ArgumentException("Invalid phone number");
+            }
+
+            var customer = _mapper.Map<Customer>(customerDto);
+            await _customerRepository.AddAsync(customer);
         }
+
+      
 
         public Task DeleteCustomer(int id)
         {

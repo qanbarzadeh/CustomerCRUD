@@ -1,5 +1,6 @@
 ﻿
 using AutoMapper;
+using Castle.Core.Resource;
 using Mc2.CrudTest.Application.DTO;
 using Mc2.CrudTest.Application.Repositories;
 using Mc2.CrudTest.Application.Services;
@@ -123,5 +124,69 @@ namespace Mc2.CrudTest.Application.Tests
             Assert.Equal(expectedCustomers.Count, actualCustomers.Count());
 
         }
+
+        [Fact]
+        public async Task AddCustomer_WithValidCustomer_ShouldAddCustomerToDatabase()
+        {
+            // Arrange
+            int id = 1;
+            var customerDto = new CustomerDTO
+            {
+                Firstname = "Sara",
+                Lastname = "While",
+                DateOfBirth = new DateTime(1980, 1, 1),
+                PhoneNumber = "60173771596",
+                Email = "saraw@example.com",
+                BankAccountNumber = "123-456-789"
+            };
+
+            var mockCustomerRepository = new Mock<ICustomerRepository>();
+            mockCustomerRepository.Setup(x => x.AddAsync(It.IsAny<Customer>()))
+                .Callback<Customer>(x => x.Id = id);
+            //IMapper mock 
+            var mockMapper = new Mock<IMapper>();
+            mockMapper.Setup(m => m.Map<Customer>(It.IsAny<CustomerDTO>())).Returns<CustomerDTO>(dto => new Customer(
+                dto.Firstname,
+                dto.Lastname,
+                dto.DateOfBirth,
+                dto.PhoneNumber,
+                dto.Email,
+                dto.BankAccountNumber
+            ));
+
+
+            var customerService = new CustomerService(mockMapper.Object, mockCustomerRepository.Object);
+
+            // Act
+            await customerService.AddCustomer(customerDto);
+
+
+            // Assert
+            mockCustomerRepository.Verify(x => x.AddAsync(It.IsAny<Customer>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task AddCustomer_WithInvalidPhoneNumber_ThrowsArgumentException()
+        {
+            // Arrange
+            var customerDto = new CustomerDTO
+            {
+                Firstname = "John",
+                Lastname = "Doe",
+                DateOfBirth = new DateTime(1980, 1, 1),
+                PhoneNumber = "invalid",
+                Email = "johndoe@example.com",
+                BankAccountNumber = "123-456-789"
+            };
+
+            var mockMapper = new Mock<IMapper>();
+            var mockCustomerRepository = new Mock<ICustomerRepository>();
+            var customerService = new CustomerService(mockMapper.Object, mockCustomerRepository.Object);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentException>(() => customerService.AddCustomer(customerDto));
+        }
+
+
     }
 }
