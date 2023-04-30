@@ -1,6 +1,7 @@
 ﻿
 using AutoMapper;
 using Mc2.CrudTest.Application.DTO;
+using Mc2.CrudTest.Application.Mapping;
 using Mc2.CrudTest.Application.Repositories;
 using Mc2.CrudTest.Application.Services;
 using Mc2.CrudTest.Domain.Entities;
@@ -19,11 +20,13 @@ namespace Mc2.CrudTest.Application.Tests
 
         public CustomerServiceTests()
         {
-            var config = new MapperConfiguration(cfg =>
+            var mapperConfiguration = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<Customer, CustomerDTO>();
+                cfg.AddProfile<MappingProfile>();
             });
-            _mapper = config.CreateMapper();
+            var mapper = mapperConfiguration.CreateMapper();
+            _mapper = mapper;
+
 
             _dbContextOptions = new DbContextOptionsBuilder<Infrastructure.Data.ApplicationDbContext>()
                 .UseInMemoryDatabase(databaseName: "TestDatabase")
@@ -134,41 +137,37 @@ namespace Mc2.CrudTest.Application.Tests
         public async Task AddCustomer_WithValidCustomer_ShouldAddCustomerToDatabase()
         {
             // Arrange
-            int id = 1;
-            var customerDto = new CustomerDTO
+            var customerDto = CreateCustomerDto();
+
+            using (var context = new ApplicationDbContext(_dbContextOptions))
             {
-                Firstname = "Sara",
-                Lastname = "While",
-                DateOfBirth = new DateTime(1980, 1, 1),
-                PhoneNumber = "60173771596",
-                Email = "saraw@example.com",
-                BankAccountNumber = "123-456-789"
-            };
 
-            var mockCustomerRepository = new Mock<ICustomerRepository>();
-            mockCustomerRepository.Setup(x => x.AddAsync(It.IsAny<Customer>()))
-                .Callback<Customer>(x => x.Id = id);
-            //IMapper mock 
-            var mockMapper = new Mock<IMapper>();
-            mockMapper.Setup(m => m.Map<Customer>(It.IsAny<CustomerDTO>())).Returns<CustomerDTO>(dto => new Customer(
-                dto.Firstname,
-                dto.Lastname,
-                dto.DateOfBirth,
-                dto.PhoneNumber,
-                dto.Email,
-                dto.BankAccountNumber
-            ));
+                // Add a customer to the database so that there is at least one customer in the database
+                var customer = new Customer("alireza", "Qanbarzadeh", new DateTime(1984, 1, 1), "+60173771596", "areza@gmail.com", "DE89370400440532013000"); 
+                await context.Customers.AddAsync(customer);
+                await context.SaveChangesAsync();
 
+                var mockCustomerRepository = new Mock<ICustomerRepository>();
+                mockCustomerRepository.Setup(repo => repo.IsEmailUniqueAsync(It.IsAny<string>())).ReturnsAsync(true);
 
-            var customerService = new CustomerService(mockMapper.Object, mockCustomerRepository.Object);
+                var customerService = new CustomerService(_mapper, mockCustomerRepository.Object);
 
-            // Act
-            await customerService.AddCustomer(customerDto);
+                // Act
+                await customerService.AddCustomer(customerDto);
 
-
-            // Assert
-            mockCustomerRepository.Verify(x => x.AddAsync(It.IsAny<Customer>()), Times.Once);
+                // Assert
+                var savedCustomer = await context.Customers.SingleAsync();
+                Assert.Equal(customerDto.Firstname, savedCustomer.Firstname);
+                Assert.Equal(customerDto.Lastname, savedCustomer.Lastname);
+                Assert.Equal(customerDto.DateOfBirth, savedCustomer.DateOfBirth);
+                Assert.Equal(customerDto.PhoneNumber, savedCustomer.PhoneNumber);
+                Assert.Equal(customerDto.Email, savedCustomer.Email);
+                Assert.Equal(customerDto.BankAccountNumber, savedCustomer.BankAccountNumber);
+            }
         }
+
+
+
 
         [Fact]
         public async Task AddCustomer_WithInvalidPhoneNumber_ThrowsArgumentException()
@@ -291,7 +290,7 @@ namespace Mc2.CrudTest.Application.Tests
                 DateOfBirth = new DateTime(1984, 1, 1),
                 PhoneNumber = "+60173771596",
                 Email = "areza@gmail.com",
-                BankAccountNumber = "S500invalid"
+                BankAccountNumber = "DE89370400440532013000"
             };
 
         }
