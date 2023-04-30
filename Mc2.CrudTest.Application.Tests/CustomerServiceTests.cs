@@ -187,6 +187,31 @@ namespace Mc2.CrudTest.Application.Tests
             await Assert.ThrowsAsync<ArgumentException>(() => customerService.AddCustomer(customerDto));
         }
 
+        [Fact]
+        public async Task AddCustomer_WithInvalidEmail_ShouldThrowArgumentException()
+        {
+            // Arrange
+            var customerDto = new CustomerDTO
+            {
+                Firstname = "alireza",
+                Lastname = "Q",
+                DateOfBirth = new DateTime(1984,1,1),
+                PhoneNumber = "123-456-7890",
+                Email = "invalid email address",
+                BankAccountNumber = "123-456-789"
+            };
+
+            var mockMapper = new Mock<IMapper>();
+            var mockRepository = new Mock<ICustomerRepository>();
+            var customerService = new CustomerService(mockMapper.Object, mockRepository.Object);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentException>(() => customerService.AddCustomer(customerDto));
+        }
+
+       
+
+
 
     }
 }

@@ -21,7 +21,10 @@ namespace Mc2.CrudTest.Infrastructure.Configuration
             // Validation for unique Email
             builder.HasIndex(c => c.Email).IsUnique();
 
-            
+            // Validation for unique BankAccountNumber
+            builder.HasIndex(c => c.BankAccountNumber).IsUnique();
+
+
         }
     }
 }

@@ -36,6 +36,18 @@ namespace Mc2.CrudTest.Application.Services
                 throw new ArgumentException("Invalid phone number");
             }
 
+            // Validate the email
+            if (!ValidationUtility.IsValidEmail(customerDto.Email))
+            {
+                throw new ArgumentException("Invalid email");
+            }
+
+            // Validate the bank account number
+            if (!ValidationUtility.IsValidBankAccountNumber(customerDto.BankAccountNumber))
+            {
+                throw new ArgumentException("Invalid bank account number");
+            }
+
             var customer = _mapper.Map<Customer>(customerDto);
             await _customerRepository.AddAsync(customer);
         }

@@ -1,4 +1,5 @@
 ﻿using Mc2.CrudTest.Domain.Entities;
+using Mc2.CrudTest.Infrastructure.Configuration;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,13 @@ namespace Mc2.CrudTest.Infrastructure.Data
         }
 
         public DbSet<Customer> Customers { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.ApplyConfiguration(new CustomerConfiguration());
+        }
 
     }
 }
