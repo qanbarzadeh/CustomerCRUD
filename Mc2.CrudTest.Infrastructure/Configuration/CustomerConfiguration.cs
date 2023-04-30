@@ -8,7 +8,21 @@ namespace Mc2.CrudTest.Infrastructure.Configuration
     {
         public void Configure(EntityTypeBuilder<Customer> builder)
         {
-           
+            builder.HasKey(c => c.Id);
+
+            builder.Property(c => c.Firstname).IsRequired().HasMaxLength(50);
+
+            builder.Property(c => c.Lastname).IsRequired().HasMaxLength(50);
+
+            builder.Property(c => c.DateOfBirth).IsRequired();
+
+            // Use string instead of ulong to store phone number
+            builder.Property(c => c.PhoneNumber).HasMaxLength(15);
+
+            builder.Property(c => c.Email).IsRequired().HasMaxLength(100);
+
+            builder.Property(c => c.BankAccountNumber).HasMaxLength(50);
+
             builder.HasIndex(c => new { c.Firstname, c.Lastname, c.DateOfBirth }).IsUnique();
 
             // Validation for unique Email
@@ -16,6 +30,7 @@ namespace Mc2.CrudTest.Infrastructure.Configuration
 
             // Validation for unique BankAccountNumber
             builder.HasIndex(c => c.BankAccountNumber).IsUnique();
+
         }
     }
 }
