@@ -136,6 +136,24 @@ namespace Mc2.CrudTest.Infrastructure.Tests
             }
         }
 
+        [Fact]
+        public async Task GetByIdAsync_WithInvalidCustomerId_ShouldThrowException()
+        {
+            // Arrange
+            int id = 1;
+
+            using (var context = new ApplicationDbContext(_options))
+            {
+                var customerRepository = new CustomerRepository(context);
+
+                // Act and Assert
+                var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => customerRepository.GetByIdAsync(id));
+                Assert.Equal($"Customer with ID {id} not found", ex.Message);
+            }
+        }
+
+
+
     }
 }
 

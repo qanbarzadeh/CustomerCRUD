@@ -66,13 +66,37 @@ namespace Mc2.CrudTest.Infrastructure.Repositories
 
         public async Task<IEnumerable<Customer>> GetAllAsync()
         {
-            return  await _context.Customers.ToListAsync();
+            try
+            {
+                var customers = await _context.Customers.ToListAsync();
+                return customers;
+            }
+            catch (Exception ex)
+            {
+                //log exception here 
+                return Enumerable.Empty<Customer>();
+            }
         }
 
-        public Task<Customer> GetByIdAsync(int id)
+        public async Task<Customer> GetByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var customer = await _context.Customers.FindAsync(id);
+                if (customer == null)
+                {
+                    throw new InvalidOperationException($"Customer with ID {id} not found");
+                }
+                return customer;
+            }
+            catch (Exception ex)
+            {
+                //_logger.LogError(ex, $"Error in {nameof(GetByIdAsync)} method of {nameof(CustomerRepository)}");
+                throw;
+            }
         }
+
+
 
         public Task UpdateAsync(Customer customer)
         {
