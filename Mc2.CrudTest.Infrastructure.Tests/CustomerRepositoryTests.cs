@@ -19,6 +19,56 @@ namespace Mc2.CrudTest.Infrastructure.Tests
                 .Options;
             
         }
+        [Fact]
+        public async Task GetAllAsync_ReturnsAllCustomers()
+        {
+            // Arrange
+            var customers = new List<Customer>()
+            {
+               new Customer
+               (
+                firstname: "Sara",
+                lastname: "White",
+                dateOfBirth: new DateTime(1990, 1, 1),
+                phoneNumber: "123asdfas",
+                email: "saraw@gmail.com",
+                bankAccountNumber: "123-456-789"){ Id =1},
+
+               new Customer
+               (
+                firstname: "dara",
+                lastname: "smith",
+                dateOfBirth: new DateTime(1990, 1, 1),
+                phoneNumber: "123-3453-345",
+                email: "saraw@gmail.com",
+                bankAccountNumber: "123-456-789"){ Id =2}
+
+            }; 
+
+               
+            
+
+            using (var context = new ApplicationDbContext(_options))
+            {
+                await context.Customers.AddRangeAsync(customers);
+                await context.SaveChangesAsync();
+            }
+
+            using (var context = new ApplicationDbContext(_options))
+            {
+                var repository = new CustomerRepository(context);
+
+                // Act
+                var result = await repository.GetAllAsync();
+
+                // Assert
+                Assert.NotNull(result);
+                Assert.Equal(2, result.Count());
+                Assert.Equal(customers.First().Id, result.First().Id);
+                Assert.Equal(customers.Last().Id, result.Last().Id);
+            }
+        }
+
 
         [Fact]
         public async Task AddAsync_WithValidCustomer_ShouldAddCustomerToDatabase()

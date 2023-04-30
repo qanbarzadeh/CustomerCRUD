@@ -31,11 +31,9 @@ namespace Mc2.CrudTest.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                // You can log the exception here if you want.
+               
                 throw new InvalidOperationException("An error occurred while adding the customer.", ex);
             }
-
-
         }
 
         public async Task DeleteAsync(int id)
@@ -65,7 +63,6 @@ namespace Mc2.CrudTest.Infrastructure.Repositories
                 }
             }
         }
-
 
         public async Task<IEnumerable<Customer>> GetAllAsync()
         {
