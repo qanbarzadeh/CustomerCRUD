@@ -209,7 +209,40 @@ namespace Mc2.CrudTest.Application.Tests
             await Assert.ThrowsAsync<ArgumentException>(() => customerService.AddCustomer(customerDto));
         }
 
-       
+        [Fact]
+        public async Task AddCustomer_WithInvalidBankAccountNumber_ShouldThrowArgumentException()
+        {
+            // Arrange
+            var customerDto = new CustomerDTO
+            {
+                Firstname = "alireza",
+                Lastname = "Qanbarzadeh",
+                DateOfBirth = new DateTime(1984, 1, 1),
+                PhoneNumber = "+60173771596",
+                Email = "ghxalireza@gmail.com",
+                BankAccountNumber = "S500invalid"
+            };
+
+            var mockCustomerRepository = new Mock<ICustomerRepository>();
+            var mockMapper = new Mock<IMapper>();
+            mockMapper.Setup(m => m.Map<Customer>(It.IsAny<CustomerDTO>())).Returns<CustomerDTO>(dto => new Customer(
+                dto.Firstname,
+                dto.Lastname,
+                dto.DateOfBirth,
+                dto.PhoneNumber,
+                dto.Email,
+                dto.BankAccountNumber
+            ));
+
+            var customerService = new CustomerService(mockMapper.Object, mockCustomerRepository.Object);
+
+            // Act
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => customerService.AddCustomer(customerDto));
+
+            // Assert
+            Assert.Equal("Invalid bank account number", ex.Message);
+        }
+
 
 
 
