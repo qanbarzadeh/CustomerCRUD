@@ -10,9 +10,9 @@ namespace Mc2.CrudTest.Infrastructure.Configuration
         {
             builder.HasKey(c => c.Id);
 
-            builder.Property(c => c.Firstname).IsRequired().HasMaxLength(50);
+            builder.Property(c => c.FirstName).IsRequired().HasMaxLength(50);
 
-            builder.Property(c => c.Lastname).IsRequired().HasMaxLength(50);
+            builder.Property(c => c.LastName).IsRequired().HasMaxLength(50);
 
             builder.Property(c => c.DateOfBirth).IsRequired();
 
@@ -23,7 +23,7 @@ namespace Mc2.CrudTest.Infrastructure.Configuration
 
             builder.Property(c => c.BankAccountNumber).HasMaxLength(50);
 
-            builder.HasIndex(c => new { c.Firstname, c.Lastname, c.DateOfBirth }).IsUnique();
+            builder.HasIndex(c => new { c.FirstName, c.LastName, c.DateOfBirth }).IsUnique();
 
             // Validation for unique Email
             builder.HasIndex(c => c.Email).IsUnique();

@@ -22,8 +22,8 @@ namespace Mc2.CrudTest.Domain.Tests
 
             // Assert
             Assert.NotNull(customer);
-            Assert.Equal(firstname, customer.Firstname);
-            Assert.Equal(lastname, customer.Lastname);
+            Assert.Equal(firstname, customer.FirstName);
+            Assert.Equal(lastname, customer.LastName);
             Assert.Equal(dateOfBirth, customer.DateOfBirth);
             Assert.Equal(phoneNumber, customer.PhoneNumber);
             Assert.Equal(email, customer.Email);

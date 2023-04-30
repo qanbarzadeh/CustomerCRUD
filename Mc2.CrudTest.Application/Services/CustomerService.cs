@@ -105,8 +105,8 @@ namespace Mc2.CrudTest.Application.Services
             var customerDto = new CustomerDTO
             {
                 Id = customer.Id,
-                Firstname = customer.Firstname,
-                Lastname = customer.Lastname,
+                FirstName = customer.FirstName,
+                LastName = customer.LastName,
                 DateOfBirth = customer.DateOfBirth,
                 PhoneNumber = customer.PhoneNumber,
                 Email = customer.Email,
@@ -150,8 +150,8 @@ namespace Mc2.CrudTest.Application.Services
             }
 
             // Update the customer properties
-            customer.Firstname = customerDto.Firstname;
-            customer.Lastname = customerDto.Lastname;
+            customer.FirstName = customerDto.FirstName;
+            customer.LastName = customerDto.LastName;
             customer.DateOfBirth = customerDto.DateOfBirth;
             customer.PhoneNumber = customerDto.PhoneNumber;
             customer.Email = customerDto.Email;

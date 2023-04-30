@@ -58,8 +58,8 @@ namespace Mc2.CrudTest.Application.Tests
             // Assert
             Assert.NotNull(actualCustomer);
             Assert.Equal(expectedCustomer.Id, actualCustomer.Id);
-            Assert.Equal(expectedCustomer.Firstname, actualCustomer.Firstname);
-            Assert.Equal(expectedCustomer.Lastname, actualCustomer.Lastname);
+            Assert.Equal(expectedCustomer.FirstName, actualCustomer.FirstName);
+            Assert.Equal(expectedCustomer.LastName, actualCustomer.LastName);
             Assert.Equal(expectedCustomer.DateOfBirth, actualCustomer.DateOfBirth);
             Assert.Equal(expectedCustomer.PhoneNumber, actualCustomer.PhoneNumber);
             Assert.Equal(expectedCustomer.Email, actualCustomer.Email);
@@ -108,8 +108,8 @@ namespace Mc2.CrudTest.Application.Tests
             var expectedCustomerDTOs = expectedCustomers.Select(c => new CustomerDTO
             {
                 Id = c.Id,
-                Firstname = c.Firstname,
-                Lastname = c.Lastname,
+                FirstName = c.FirstName,
+                LastName = c.LastName,
                 DateOfBirth = c.DateOfBirth,
                 PhoneNumber = c.PhoneNumber,
                 Email = c.Email,
@@ -157,8 +157,8 @@ namespace Mc2.CrudTest.Application.Tests
 
                 // Assert
                 var savedCustomer = await context.Customers.SingleAsync();
-                Assert.Equal(customerDto.Firstname, savedCustomer.Firstname);
-                Assert.Equal(customerDto.Lastname, savedCustomer.Lastname);
+                Assert.Equal(customerDto.FirstName, savedCustomer.FirstName);
+                Assert.Equal(customerDto.LastName, savedCustomer.LastName);
                 Assert.Equal(customerDto.DateOfBirth, savedCustomer.DateOfBirth);
                 Assert.Equal(customerDto.PhoneNumber, savedCustomer.PhoneNumber);
                 Assert.Equal(customerDto.Email, savedCustomer.Email);
@@ -175,8 +175,8 @@ namespace Mc2.CrudTest.Application.Tests
             // Arrange
             var customerDto = new CustomerDTO
             {
-                Firstname = "John",
-                Lastname = "Doe",
+                FirstName = "John",
+                LastName = "Doe",
                 DateOfBirth = new DateTime(1980, 1, 1),
                 PhoneNumber = "invalid",
                 Email = "johndoe@example.com",
@@ -198,8 +198,8 @@ namespace Mc2.CrudTest.Application.Tests
             // Arrange
             var customerDto = new CustomerDTO
             {
-                Firstname = "alireza",
-                Lastname = "Q",
+                FirstName = "alireza",
+                LastName = "Q",
                 DateOfBirth = new DateTime(1984, 1, 1),
                 PhoneNumber = "123-456-7890",
                 Email = "invalid email address",
@@ -240,8 +240,8 @@ namespace Mc2.CrudTest.Application.Tests
             // Arrange
             var customerDto = new CustomerDTO
             {
-                Firstname = "John",
-                Lastname = "Doe",
+                FirstName = "John",
+                LastName = "Doe",
                 DateOfBirth = new DateTime(1990, 1, 1),
                 PhoneNumber = "+989391215575",
                 Email = "johndoe@example.com",
@@ -255,8 +255,8 @@ namespace Mc2.CrudTest.Application.Tests
             // IMapper mock
             var mockMapper = new Mock<IMapper>();
             mockMapper.Setup(m => m.Map<Customer>(It.IsAny<CustomerDTO>())).Returns<CustomerDTO>(dto => new Customer(
-                dto.Firstname,
-                dto.Lastname,
+                dto.FirstName,
+                dto.LastName,
                 dto.DateOfBirth,
                 dto.PhoneNumber,
                 dto.Email,
@@ -273,12 +273,41 @@ namespace Mc2.CrudTest.Application.Tests
 
         }
 
+
+        [Fact]
+        public void TestCustomerToCustomerDtoMapping()
+        {
+            // Arrange
+            var customer = new Customer(
+               firstname: "John",
+               lastname: "Doe",
+               dateOfBirth: new DateTime(1980, 1, 1),
+               phoneNumber: "123-456-7890",
+               email: "johndoe@example.com",
+              bankAccountNumber: "123-456-789")
+            {
+                Id = 1
+            }; 
+            var config = new MapperConfiguration(cfg => cfg.AddProfile(new MappingProfile()));
+            var mapper = config.CreateMapper();
+
+            // Act
+            var customerDto = mapper.Map<CustomerDTO>(customer);
+
+            // Assert
+            Assert.Equal(customer.Id, customerDto.Id);
+            Assert.Equal(customer.FirstName, customerDto.FirstName);
+            Assert.Equal(customer.LastName, customerDto.LastName);
+            Assert.Equal(customer.Email, customerDto.Email);
+        }
+
+
         private static CustomerDTO CreateCustomerDto()
         {
             return new CustomerDTO
             {
-                Firstname = "alireza",
-                Lastname = "Qanbarzadeh",
+                FirstName = "alireza",
+                LastName = "Qanbarzadeh",
                 DateOfBirth = new DateTime(1984, 1, 1),
                 PhoneNumber = "+60173771596",
                 Email = "areza@gmail.com",

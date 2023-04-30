@@ -3,6 +3,7 @@ using Mc2.CrudTest.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System;
+using System.Linq;
 
 namespace Mc2.CrudTest.Presentation.Server.Controllers
 {
@@ -21,6 +22,12 @@ namespace Mc2.CrudTest.Presentation.Server.Controllers
         public async Task<IActionResult> GetAll()
         {
             var customers = await _customerService.GetAllCustomers();
+
+            if (customers == null || !customers.Any())
+            {
+                return NoContent();
+            }
+
             return Ok(customers);
         }
 

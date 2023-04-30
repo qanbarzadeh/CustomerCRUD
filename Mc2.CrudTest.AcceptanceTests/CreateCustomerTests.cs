@@ -22,8 +22,8 @@ namespace Mc2.CrudTest.AcceptanceTests
             // Arrange
             var customerData = new CustomerDTO
             {
-                Firstname = "Sara",
-                Lastname = "White",
+                FirstName = "Sara",
+                LastName = "White",
                 DateOfBirth = new DateTime(1980, 1, 1),
                 PhoneNumber = "invalid",
                 Email = "ghxalireza@gmail.com",

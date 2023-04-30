@@ -26,6 +26,7 @@ namespace Mc2.CrudTest.Infrastructure.Repositories
             try
             {
                 await _context.Customers.AddAsync(customer);
+                await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {

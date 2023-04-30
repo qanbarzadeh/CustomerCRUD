@@ -12,9 +12,9 @@ namespace Mc2.CrudTest.Domain.Entities
       
         public int Id { get; set; }
 
-        public string? Firstname { get; set; }
+        public string? FirstName { get; set; }
 
-        public string? Lastname { get; set; }
+        public string? LastName { get; set; }
 
         public DateTime DateOfBirth { get; set; } = DateTime.MinValue;
 
@@ -28,8 +28,8 @@ namespace Mc2.CrudTest.Domain.Entities
         }
         public Customer(string firstname, string lastname, DateTime dateOfBirth, string phoneNumber, string email, string bankAccountNumber)
         {
-            Firstname = firstname;
-            Lastname = lastname;
+            FirstName = firstname;
+            LastName = lastname;
             DateOfBirth = dateOfBirth;
             PhoneNumber = phoneNumber;
             Email = email;

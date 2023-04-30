@@ -177,7 +177,7 @@ namespace Mc2.CrudTest.Infrastructure.Tests
             {
                 var customerRepository = new CustomerRepository(context);
 
-                customer.Firstname = "Changed";
+                customer.FirstName = "Changed";
                 await customerRepository.UpdateAsync(customer);
                 await context.SaveChangesAsync();
             }
@@ -186,7 +186,7 @@ namespace Mc2.CrudTest.Infrastructure.Tests
             using (var context = new ApplicationDbContext(_options))
             {
                 var updatedCustomer = await context.Customers.FindAsync(id);
-                Assert.Equal("Changed", updatedCustomer.Firstname);
+                Assert.Equal("Changed", updatedCustomer.FirstName);
             }
         }
 
