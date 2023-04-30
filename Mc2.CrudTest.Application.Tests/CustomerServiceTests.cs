@@ -5,6 +5,9 @@ using Mc2.CrudTest.Application.DTO;
 using Mc2.CrudTest.Application.Repositories;
 using Mc2.CrudTest.Application.Services;
 using Mc2.CrudTest.Domain.Entities;
+using Mc2.CrudTest.Infrastructure;
+using Mc2.CrudTest.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 
 
@@ -14,6 +17,7 @@ namespace Mc2.CrudTest.Application.Tests
     public class CustomerServiceTests
     {
         private readonly IMapper _mapper;
+
         public CustomerServiceTests()
         {
             var config = new MapperConfiguration(cfg =>
@@ -41,7 +45,7 @@ namespace Mc2.CrudTest.Application.Tests
 
             var mockMapper = new Mock<IMapper>();
             var mockRepository = new Mock<ICustomerRepository>();
-            mockRepository.Setup(repo => repo.GetByIdAsync(id)).ReturnsAsync(expectedCustomer);
+            mockRepository.Setup(repo => repo.GetByIdAsync(id)).ReturnsAsync(expectedCustomer);            
             var customerService = new CustomerService(mockMapper.Object, mockRepository.Object);
             // Act
             var actualCustomer = await customerService.GetCustomerById(id);
@@ -112,8 +116,7 @@ namespace Mc2.CrudTest.Application.Tests
                 .Returns((Customer source) => expectedCustomerDTOs.Single(dto => dto.Id == source.Id));
 
             var mockRepository = new Mock<ICustomerRepository>();
-            mockRepository.Setup(repo => repo.GetAllAsync()).ReturnsAsync(expectedCustomers);
-
+            mockRepository.Setup(repo => repo.GetAllAsync()).ReturnsAsync(expectedCustomers);            
             var customerService = new CustomerService(mockMapper.Object, mockRepository.Object);
 
             // Act
@@ -154,7 +157,7 @@ namespace Mc2.CrudTest.Application.Tests
                 dto.BankAccountNumber
             ));
 
-
+            
             var customerService = new CustomerService(mockMapper.Object, mockCustomerRepository.Object);
 
             // Act
@@ -181,6 +184,7 @@ namespace Mc2.CrudTest.Application.Tests
 
             var mockMapper = new Mock<IMapper>();
             var mockCustomerRepository = new Mock<ICustomerRepository>();
+            
             var customerService = new CustomerService(mockMapper.Object, mockCustomerRepository.Object);
 
             // Act & Assert
@@ -233,7 +237,6 @@ namespace Mc2.CrudTest.Application.Tests
                 dto.Email,
                 dto.BankAccountNumber
             ));
-
             var customerService = new CustomerService(mockMapper.Object, mockCustomerRepository.Object);
 
             // Act
@@ -243,6 +246,44 @@ namespace Mc2.CrudTest.Application.Tests
             Assert.Equal("Invalid bank account number", ex.Message);
         }
 
+        [Fact]
+        public async Task AddCustomer_WithDuplicateEmail_ShouldThrowException()
+        {
+            // Arrange
+            var customerDto = new CustomerDTO
+            {
+                Firstname = "John",
+                Lastname = "Doe",
+                DateOfBirth = new DateTime(1990, 1, 1),
+                PhoneNumber = "+989391215575",
+                Email = "johndoe@example.com",
+                BankAccountNumber = "123-456-789"
+            };
+
+            // Mock ICustomerRepository
+            var mockCustomerRepository = new Mock<ICustomerRepository>();
+            mockCustomerRepository.Setup(x => x.IsEmailUniqueAsync(It.IsAny<string>())).ReturnsAsync(false);
+
+            // IMapper mock
+            var mockMapper = new Mock<IMapper>();
+            mockMapper.Setup(m => m.Map<Customer>(It.IsAny<CustomerDTO>())).Returns<CustomerDTO>(dto => new Customer(
+                dto.Firstname,
+                dto.Lastname,
+                dto.DateOfBirth,
+                dto.PhoneNumber,
+                dto.Email,
+                dto.BankAccountNumber
+            ));
+
+            // Create CustomerService instance
+            var customerService = new CustomerService(mockMapper.Object, mockCustomerRepository.Object);
+
+            // Act
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => customerService.AddCustomer(customerDto));
+            // Assert
+            Assert.Equal("Email already exists", ex.Message);
+
+        }
 
 
 

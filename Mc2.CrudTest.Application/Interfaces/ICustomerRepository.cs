@@ -14,6 +14,8 @@ namespace Mc2.CrudTest.Application.Repositories
         Task AddAsync(Customer customer);
         Task UpdateAsync(Customer customer);
         Task DeleteAsync(int id);
+        Task<bool> IsEmailUniqueAsync(string email);
+
     }
 
 }

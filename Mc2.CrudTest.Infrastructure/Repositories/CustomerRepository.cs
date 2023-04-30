@@ -96,6 +96,11 @@ namespace Mc2.CrudTest.Infrastructure.Repositories
             }
         }
 
+        public async  Task<bool> IsEmailUniqueAsync(string email)
+        {
+            return !await _context.Customers.AnyAsync(c => c.Email == email);
+        }
+
         public async Task UpdateAsync(Customer customer)
         {
             if (customer == null)

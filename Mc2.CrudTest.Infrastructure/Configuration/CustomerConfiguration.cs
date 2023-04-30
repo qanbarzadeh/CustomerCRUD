@@ -23,8 +23,6 @@ namespace Mc2.CrudTest.Infrastructure.Configuration
 
             // Validation for unique BankAccountNumber
             builder.HasIndex(c => c.BankAccountNumber).IsUnique();
-
-
         }
     }
 }

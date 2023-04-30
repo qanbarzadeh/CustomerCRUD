@@ -4,6 +4,7 @@ using Mc2.CrudTest.Application.Interfaces;
 using Mc2.CrudTest.Application.Repositories;
 using Mc2.CrudTest.Domain.Entities;
 using Mc2.CrudTest.Shared.Utilities;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,8 @@ namespace Mc2.CrudTest.Application.Services
     public class CustomerService : ICustomerService
     {
         private readonly ICustomerRepository _customerRepository;
-        private readonly IMapper _mapper; 
+        private readonly IMapper _mapper;
+        
 
         public CustomerService(IMapper mapper , ICustomerRepository customerRepository)
         {
@@ -42,14 +44,22 @@ namespace Mc2.CrudTest.Application.Services
                 throw new ArgumentException("Invalid email");
             }
 
+            // Check if the email is unique
+            if (!await _customerRepository.IsEmailUniqueAsync(customerDto.Email))
+            {
+                throw new ArgumentException("Email already exists");
+            }
+
             // Validate the bank account number
             if (!ValidationUtility.IsValidBankAccountNumber(customerDto.BankAccountNumber))
             {
                 throw new ArgumentException("Invalid bank account number");
             }
 
-            var customer = _mapper.Map<Customer>(customerDto);
-            await _customerRepository.AddAsync(customer);
+
+               var customer = _mapper.Map<Customer>(customerDto);
+               await _customerRepository.AddAsync(customer);
+            
         }
 
       
@@ -116,5 +126,7 @@ namespace Mc2.CrudTest.Application.Services
         {
             throw new NotImplementedException();
         }
+
+      
     }
 }
