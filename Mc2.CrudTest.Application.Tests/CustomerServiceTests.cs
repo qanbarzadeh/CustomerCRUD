@@ -219,28 +219,20 @@ namespace Mc2.CrudTest.Application.Tests
         {
             // Arrange
             var customerDto = CreateCustomerDto();
+            customerDto.BankAccountNumber = "invalid23452345";
 
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: "TestDb")
-                .Options;
+            var mockCustomerRepository = new Mock<ICustomerRepository>();
+            mockCustomerRepository.Setup(repo => repo.IsEmailUniqueAsync(It.IsAny<string>())).ReturnsAsync(true);
 
-            using (var context = new ApplicationDbContext(options))
-            {
-                await context.Customers.AddAsync(new Customer("Test", "User", new DateTime(1990, 1, 1), "+60123456789", "testuser@example.com", "S500valid"));
-                await context.SaveChangesAsync();
+            var customerService = new CustomerService(_mapper, mockCustomerRepository.Object);
 
-                var mockCustomerRepository = new Mock<ICustomerRepository>();
-                mockCustomerRepository.Setup(repo => repo.IsEmailUniqueAsync(It.IsAny<string>())).ReturnsAsync(true);
+            // Act
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => customerService.AddCustomer(customerDto));
 
-                var customerService = new CustomerService(_mapper, mockCustomerRepository.Object);
-
-                // Act
-                var ex = await Assert.ThrowsAsync<ArgumentException>(() => customerService.AddCustomer(customerDto));
-
-                // Assert
-                Assert.Equal("Invalid bank account number", ex.Message);
-            }
+            // Assert
+            Assert.Equal("Invalid bank account number", ex.Message);
         }
+
 
         [Fact]
         public async Task AddCustomer_WithDuplicateEmail_ShouldThrowException()
