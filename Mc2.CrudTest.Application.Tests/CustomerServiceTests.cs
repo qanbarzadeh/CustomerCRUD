@@ -215,7 +215,7 @@ namespace Mc2.CrudTest.Application.Tests
 
 
         [Fact]
-        public async Task AddCustomer_WithDuplicateEmail_ShouldThrowException222()
+        public async Task AddCustomer_WithDuplicateEmail_ShouldThrowException()
         {
             // Arrange
             var customerDto = new CustomerDTO
