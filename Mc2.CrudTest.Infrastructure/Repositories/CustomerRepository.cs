@@ -1,4 +1,4 @@
-﻿using Mc2.CrudTest.Application.Repositories;
+﻿using Mc2.CrudTest.Application.Interfaces;
 using Mc2.CrudTest.Domain.Entities;
 using Mc2.CrudTest.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;

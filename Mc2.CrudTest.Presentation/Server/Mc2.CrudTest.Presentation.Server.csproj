@@ -16,7 +16,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Mc2.CrudTest.Application\Mc2.CrudTest.Application.csproj" />
     <ProjectReference Include="..\..\Mc2.CrudTest.Infrastructure\Mc2.CrudTest.Infrastructure.csproj" />
-    <ProjectReference Include="..\Shared\Mc2.CrudTest.Shared.csproj" />
   </ItemGroup>
 
 

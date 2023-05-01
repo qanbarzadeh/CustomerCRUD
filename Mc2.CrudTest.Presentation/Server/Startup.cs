@@ -9,10 +9,16 @@ using Mc2.CrudTest.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Swagger;
-using Mc2.CrudTest.Application.Repositories;
 using Mc2.CrudTest.Infrastructure.Repositories;
 using Mc2.CrudTest.Application.Interfaces;
 using Mc2.CrudTest.Application.Services;
+using Mc2.CrudTest.Presentation.Server.Extensions;
+using Mc2.CrudTest.Application.CommandHandlers;
+using Mc2.CrudTest.Application.Commands;
+using Mc2.CrudTest.Application.DTO;
+using Mc2.CrudTest.Application.Queries;
+using Mc2.CrudTest.Application.QueryHandlers;
+using System.Collections.Generic;
 
 namespace Mc2.CrudTest.Presentation.Server
 {
@@ -25,12 +31,29 @@ namespace Mc2.CrudTest.Presentation.Server
 
         public IConfiguration Configuration { get; }
 
-        
+
         public void ConfigureServices(IServiceCollection services)
         {
+            var mapperConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new MappingProfile());
+            });
+            IMapper mapper = mapperConfig.CreateMapper();
+            services.AddSingleton(mapper);
+
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseInMemoryDatabase("MyInMemoryDatabase"));
 
             services.AddScoped<ICustomerRepository, CustomerRepository>();
+
+            services.AddScoped<ICommandHandler<CreateCustomerCommand>, CreateCustomerCommandHandler>();
+            services.AddScoped<ICommandHandler<UpdateCustomerCommand>, UpdateCustomerCommandHandler>();
+            services.AddScoped<ICommandHandler<DeleteCustomerCommand>, DeleteCustomerCommandHandler>();
+
             services.AddScoped<ICustomerService, CustomerService>();
+
+            services.AddScoped<IQueryHandler<GetCustomerByIdQuery, CustomerDTO>, GetCustomerByIdQueryHandler>();
+            services.AddScoped<IQueryHandler<GetAllCustomersQuery, IEnumerable<CustomerDTO>>, GetAllCustomersQueryHandler>();
 
             services.AddSwaggerGen(c =>
             {
@@ -38,21 +61,10 @@ namespace Mc2.CrudTest.Presentation.Server
             });
 
             services.AddControllersWithViews();
-            var mapperConfig = new MapperConfiguration(mc =>
-            {
-                mc.AddProfile(new MappingProfile());
-            });
-
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseInMemoryDatabase("MyInMemoryDatabase"));
-
-
-            IMapper mapper = mapperConfig.CreateMapper();
-            services.AddSingleton(mapper);
             services.AddRazorPages();
-
-          
         }
+
+
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())

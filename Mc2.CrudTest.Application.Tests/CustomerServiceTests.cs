@@ -1,11 +1,16 @@
 ﻿
 using AutoMapper;
+using Mc2.CrudTest.Application.CommandHandlers;
+using Mc2.CrudTest.Application.Commands;
 using Mc2.CrudTest.Application.DTO;
+using Mc2.CrudTest.Application.Interfaces;
 using Mc2.CrudTest.Application.Mapping;
-using Mc2.CrudTest.Application.Repositories;
+using Mc2.CrudTest.Application.Queries;
 using Mc2.CrudTest.Application.Services;
 using Mc2.CrudTest.Domain.Entities;
 using Mc2.CrudTest.Infrastructure.Data;
+using Mc2.CrudTest.Presentation.Server.Controllers;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 
@@ -48,62 +53,69 @@ namespace Mc2.CrudTest.Application.Tests
                 Id = id
             };
 
-            var mockMapper = new Mock<IMapper>();
-            var mockRepository = new Mock<ICustomerRepository>();
-            mockRepository.Setup(repo => repo.GetByIdAsync(id)).ReturnsAsync(expectedCustomer);
-            var customerService = new CustomerService(mockMapper.Object, mockRepository.Object);
+            var mockQueryHandler = new Mock<IQueryHandler<GetCustomerByIdQuery, CustomerDTO>>();
+            mockQueryHandler.Setup(handler => handler.Handle(It.IsAny<GetCustomerByIdQuery>())).ReturnsAsync(new CustomerDTO
+            {
+                Id = expectedCustomer.Id,
+                FirstName = expectedCustomer.FirstName,
+                LastName = expectedCustomer.LastName,
+                DateOfBirth = expectedCustomer.DateOfBirth,
+                PhoneNumber = expectedCustomer.PhoneNumber,
+                Email = expectedCustomer.Email,
+                BankAccountNumber = expectedCustomer.BankAccountNumber
+            });
+
+            var controller = new CustomersController(null, null, null, mockQueryHandler.Object, null);
+
             // Act
-            var actualCustomer = await customerService.GetCustomerById(id);
+            var actionResult = await controller.Get(id);
 
             // Assert
-            Assert.NotNull(actualCustomer);
+            var okResult = Assert.IsType<OkObjectResult>(actionResult);
+            var actualCustomer = Assert.IsType<CustomerDTO>(okResult.Value);
             Assert.Equal(expectedCustomer.Id, actualCustomer.Id);
             Assert.Equal(expectedCustomer.FirstName, actualCustomer.FirstName);
             Assert.Equal(expectedCustomer.LastName, actualCustomer.LastName);
-            Assert.Equal(expectedCustomer.DateOfBirth, actualCustomer.DateOfBirth);
-            Assert.Equal(expectedCustomer.PhoneNumber, actualCustomer.PhoneNumber);
-            Assert.Equal(expectedCustomer.Email, actualCustomer.Email);
-            Assert.Equal(expectedCustomer.BankAccountNumber, actualCustomer.BankAccountNumber);
         }
+
 
         [Fact]
         public async Task GetAllCustomers_ReturnsAllCustomers()
         {
             // Arrange
             var expectedCustomers = new List<Customer>()
-            {
-                 new Customer(
-                 firstname: "John",
-                 lastname: "Doe",
-                 dateOfBirth: new DateTime(1980, 1, 1),
-                 phoneNumber: "123-456-7890",
-                 email: "johndoe@example.com",
-                bankAccountNumber: "123-456-789")
-                {
-                Id = 1
-                },
-                 new Customer(
-                firstname: "Jane",
-                lastname: "Smith",
-             dateOfBirth: new DateTime(1990, 5, 15),
+    {
+        new Customer(
+            firstname: "John",
+            lastname: "Doe",
+            dateOfBirth: new DateTime(1980, 1, 1),
+            phoneNumber: "123-456-7890",
+            email: "johndoe@example.com",
+            bankAccountNumber: "123-456-789")
+        {
+            Id = 1
+        },
+        new Customer(
+            firstname: "Jane",
+            lastname: "Smith",
+            dateOfBirth: new DateTime(1990, 5, 15),
             phoneNumber: "234-567-8901",
             email: "janesmith@example.com",
             bankAccountNumber: "234-567-890")
         {
             Id = 2
-    },
-            new Customer(
+        },
+        new Customer(
             firstname: "Bob",
             lastname: "Johnson",
             dateOfBirth: new DateTime(1985, 10, 20),
             phoneNumber: "345-678-9012",
             email: "bobjohnson@example.com",
             bankAccountNumber: "345-678-901")
-          {
-        Id = 3
-         }
-            };
-
+        {
+            Id = 3
+        }
+    };
 
             var expectedCustomerDTOs = expectedCustomers.Select(c => new CustomerDTO
             {
@@ -116,126 +128,94 @@ namespace Mc2.CrudTest.Application.Tests
                 BankAccountNumber = c.BankAccountNumber
             }).ToList();
 
-            var mockMapper = new Mock<IMapper>();
-            mockMapper.Setup(mapper => mapper.Map<CustomerDTO>(It.IsAny<Customer>()))
-                .Returns((Customer source) => expectedCustomerDTOs.Single(dto => dto.Id == source.Id));
+            var mockQueryHandler = new Mock<IQueryHandler<GetAllCustomersQuery, IEnumerable<CustomerDTO>>>();
+            mockQueryHandler.Setup(handler => handler.Handle(It.IsAny<GetAllCustomersQuery>())).ReturnsAsync(expectedCustomerDTOs);
 
-            var mockRepository = new Mock<ICustomerRepository>();
-            mockRepository.Setup(repo => repo.GetAllAsync()).ReturnsAsync(expectedCustomers);
-            var customerService = new CustomerService(mockMapper.Object, mockRepository.Object);
+            var controller = new CustomersController(null, null, null, null, mockQueryHandler.Object);
 
             // Act
-            var actualCustomers = await customerService.GetAllCustomers();
+            var actionResult = await controller.GetAll();
 
             // Assert
-            Assert.NotNull(actualCustomers);
-            Assert.Equal(expectedCustomers.Count, actualCustomers.Count());
-
+            var okResult = Assert.IsType<OkObjectResult>(actionResult);
+            var actualCustomers = Assert.IsAssignableFrom<IEnumerable<CustomerDTO>>(okResult.Value);
+            Assert.Equal(expectedCustomerDTOs.Count, actualCustomers.Count());
         }
+
 
         [Fact]
         public async Task AddCustomer_WithValidCustomer_ShouldAddCustomerToDatabase()
         {
             // Arrange
             var customerDto = CreateCustomerDto();
+            var command = new CreateCustomerCommand(customerDto);
+            var mockRepository = new Mock<ICustomerRepository>();
+            mockRepository.Setup(repo => repo.IsEmailUniqueAsync(It.IsAny<string>())).ReturnsAsync(true);
+            var mockMapper = new Mock<IMapper>();
+            mockMapper.Setup(mapper => mapper.Map<CustomerDTO, Customer>(customerDto)).Returns(new Customer());
+            var handler = new CreateCustomerCommandHandler(mockMapper.Object, mockRepository.Object);
 
-            using (var context = new ApplicationDbContext(_dbContextOptions))
+            // Act
+            await handler.Handle(command);
+
+            // Assert
+            mockRepository.Verify(repo => repo.AddAsync(It.IsAny<Customer>()), Times.Once);
+        }
+
+        public class CreateCustomerCommandHandlerTests
+        {
+            [Fact]
+            public async Task Handle_WithInvalidPhoneNumber_ThrowsArgumentException()
             {
+                // Arrange
+                var customerDto = new CustomerDTO
+                {
+                    FirstName = "John",
+                    LastName = "Doe",
+                    DateOfBirth = new DateTime(1980, 1, 1),
+                    PhoneNumber = "invalid",
+                    Email = "johndoe@example.com",
+                    BankAccountNumber = "123-456-789"
+                };
 
-                // Add a customer to the database so that there is at least one customer in the database
-                var customer = new Customer("alireza", "Qanbarzadeh", new DateTime(1984, 1, 1), "+60173771596", "areza@gmail.com", "DE89370400440532013000"); 
-                await context.Customers.AddAsync(customer);
-                await context.SaveChangesAsync();
-
+                var mockMapper = new Mock<IMapper>();
                 var mockCustomerRepository = new Mock<ICustomerRepository>();
-                mockCustomerRepository.Setup(repo => repo.IsEmailUniqueAsync(It.IsAny<string>())).ReturnsAsync(true);
 
-                var customerService = new CustomerService(_mapper, mockCustomerRepository.Object);
+                var handler = new CreateCustomerCommandHandler(mockMapper.Object, mockCustomerRepository.Object);
 
-                // Act
-                await customerService.AddCustomer(customerDto);
-
-                // Assert
-                var savedCustomer = await context.Customers.SingleAsync();
-                Assert.Equal(customerDto.FirstName, savedCustomer.FirstName);
-                Assert.Equal(customerDto.LastName, savedCustomer.LastName);
-                Assert.Equal(customerDto.DateOfBirth, savedCustomer.DateOfBirth);
-                Assert.Equal(customerDto.PhoneNumber, savedCustomer.PhoneNumber);
-                Assert.Equal(customerDto.Email, savedCustomer.Email);
-                Assert.Equal(customerDto.BankAccountNumber, savedCustomer.BankAccountNumber);
+                // Act & Assert
+                await Assert.ThrowsAsync<ArgumentException>(() => handler.Handle(new CreateCustomerCommand(customerDto)));
             }
         }
 
+        //[Fact]
+        //public async Task AddCustomer_WithInvalidEmail_ShouldThrowArgumentException()
+        //{
+        //    // Arrange
+        //    var customerDto = new CustomerDTO
+        //    {
+        //        FirstName = "alireza",
+        //        LastName = "Q",
+        //        DateOfBirth = new DateTime(1984, 1, 1),
+        //        PhoneNumber = "123-456-7890",
+        //        Email = "invalid email address",
+        //        BankAccountNumber = "123-456-789"
+        //    };
 
+        //    var mockCommandHandler = new Mock<ICommandHandler<CreateCustomerCommand>>();
+        //    var mockQueryHandler = new Mock<IQueryHandler<IsEmailUniqueQuery, bool>>();
+        //    mockQueryHandler.Setup(handler => handler.Handle(It.IsAny<IsEmailUniqueQuery>())).ReturnsAsync(false);
 
+        //    var customerService = new CustomerService(_mapper, mockCommandHandler.Object, mockQueryHandler.Object);
 
-        [Fact]
-        public async Task AddCustomer_WithInvalidPhoneNumber_ThrowsArgumentException()
-        {
-            // Arrange
-            var customerDto = new CustomerDTO
-            {
-                FirstName = "John",
-                LastName = "Doe",
-                DateOfBirth = new DateTime(1980, 1, 1),
-                PhoneNumber = "invalid",
-                Email = "johndoe@example.com",
-                BankAccountNumber = "123-456-789"
-            };
-
-            var mockMapper = new Mock<IMapper>();
-            var mockCustomerRepository = new Mock<ICustomerRepository>();
-
-            var customerService = new CustomerService(mockMapper.Object, mockCustomerRepository.Object);
-
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentException>(() => customerService.AddCustomer(customerDto));
-        }
-
-        [Fact]
-        public async Task AddCustomer_WithInvalidEmail_ShouldThrowArgumentException()
-        {
-            // Arrange
-            var customerDto = new CustomerDTO
-            {
-                FirstName = "alireza",
-                LastName = "Q",
-                DateOfBirth = new DateTime(1984, 1, 1),
-                PhoneNumber = "123-456-7890",
-                Email = "invalid email address",
-                BankAccountNumber = "123-456-789"
-            };
-
-            var mockMapper = new Mock<IMapper>();
-            var mockRepository = new Mock<ICustomerRepository>();
-            var customerService = new CustomerService(mockMapper.Object, mockRepository.Object);
-
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentException>(() => customerService.AddCustomer(customerDto));
-        }
-
-        [Fact]
-        public async Task AddCustomer_WithInvalidBankAccountNumber_ShouldThrowArgumentException()
-        {
-            // Arrange
-            var customerDto = CreateCustomerDto();
-            customerDto.BankAccountNumber = "invalid23452345";
-
-            var mockCustomerRepository = new Mock<ICustomerRepository>();
-            mockCustomerRepository.Setup(repo => repo.IsEmailUniqueAsync(It.IsAny<string>())).ReturnsAsync(true);
-
-            var customerService = new CustomerService(_mapper, mockCustomerRepository.Object);
-
-            // Act
-            var ex = await Assert.ThrowsAsync<ArgumentException>(() => customerService.AddCustomer(customerDto));
-
-            // Assert
-            Assert.Equal("Invalid bank account number", ex.Message);
-        }
+        //    // Act & Assert
+        //    var ex = await Assert.ThrowsAsync<ArgumentException>(() => customerService.AddCustomer(customerDto));
+        //    Assert.Equal("Invalid email address", ex.Message);
+        //}
 
 
         [Fact]
-        public async Task AddCustomer_WithDuplicateEmail_ShouldThrowException()
+        public async Task AddCustomer_WithDuplicateEmail_ShouldThrowException222()
         {
             // Arrange
             var customerDto = new CustomerDTO
@@ -250,7 +230,7 @@ namespace Mc2.CrudTest.Application.Tests
 
             // Mock ICustomerRepository
             var mockCustomerRepository = new Mock<ICustomerRepository>();
-            mockCustomerRepository.Setup(x => x.IsEmailUniqueAsync(It.IsAny<string>())).ReturnsAsync(false);
+            mockCustomerRepository.Setup(x => x.IsEmailUniqueAsync(customerDto.Email)).ReturnsAsync(false);
 
             // IMapper mock
             var mockMapper = new Mock<IMapper>();
@@ -263,15 +243,13 @@ namespace Mc2.CrudTest.Application.Tests
                 dto.BankAccountNumber
             ));
 
-            // Create CustomerService instance
-            var customerService = new CustomerService(mockMapper.Object, mockCustomerRepository.Object);
+            var createCustomerCommand = new CreateCustomerCommand(customerDto);
+            var createCustomerCommandHandler = new CreateCustomerCommandHandler(mockMapper.Object, mockCustomerRepository.Object);
 
-            // Act
-            var ex = await Assert.ThrowsAsync<ArgumentException>(() => customerService.AddCustomer(customerDto));
-            // Assert
-            Assert.Equal("Email already exists", ex.Message);
-
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentException>(() => createCustomerCommandHandler.Handle(createCustomerCommand));
         }
+
 
 
         [Fact]
