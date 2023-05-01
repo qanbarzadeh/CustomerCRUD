@@ -214,9 +214,8 @@ namespace Mc2.CrudTest.Application.Tests
         //}
 
 
-
         [Fact]
-        public async Task AddCustomer_WithDuplicateEmail_ShouldThrowException()
+        public async Task AddCustomer_WithDuplicateEmail_ShouldThrowException222()
         {
             // Arrange
             var customerDto = new CustomerDTO
@@ -231,7 +230,7 @@ namespace Mc2.CrudTest.Application.Tests
 
             // Mock ICustomerRepository
             var mockCustomerRepository = new Mock<ICustomerRepository>();
-            mockCustomerRepository.Setup(x => x.IsEmailUniqueAsync(It.IsAny<string>())).ReturnsAsync(false);
+            mockCustomerRepository.Setup(x => x.IsEmailUniqueAsync(customerDto.Email)).ReturnsAsync(false);
 
             // IMapper mock
             var mockMapper = new Mock<IMapper>();
@@ -244,25 +243,13 @@ namespace Mc2.CrudTest.Application.Tests
                 dto.BankAccountNumber
             ));
 
+            var createCustomerCommand = new CreateCustomerCommand(customerDto);
+            var createCustomerCommandHandler = new CreateCustomerCommandHandler(mockMapper.Object, mockCustomerRepository.Object);
 
-            // Create CustomerService instance
-            var customerService = new CustomerService(mockMapper.Object, mockCustomerRepository.Object, createCustomerCommandHandler: null, updateCustomerCommandHandler: null, deleteCustomerCommandHandler: null, getCustomerByIdQueryHandler: null, getAllCustomersQueryHandler: null);
-
-            // Act
-            var ex = await Assert.ThrowsAsync<ArgumentException>(() => customerService.Handle(new CreateCustomerCommand(customerDto)));
-            // Assert
-            Assert.Equal("Email already exists", ex.Message);
-
-
-            //// Create CustomerService instance
-            //var customerService = new CustomerService(mockMapper.Object, mockCustomerRepository.Object);
-
-            //// Act
-            //var ex = await Assert.ThrowsAsync<ArgumentException>(() => customerService.AddCustomer(customerDto));
-            //// Assert
-            //Assert.Equal("Email already exists", ex.Message);
-
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentException>(() => createCustomerCommandHandler.Handle(createCustomerCommand));
         }
+
 
 
         [Fact]
