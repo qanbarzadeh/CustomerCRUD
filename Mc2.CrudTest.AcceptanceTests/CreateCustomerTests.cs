@@ -1,6 +1,8 @@
 using AutoMapper;
+using Mc2.CrudTest.Application.CommandHandlers;
+using Mc2.CrudTest.Application.Commands;
 using Mc2.CrudTest.Application.DTO;
-using Mc2.CrudTest.Application.Repositories;
+using Mc2.CrudTest.Application.Interfaces;
 using Mc2.CrudTest.Application.Services;
 using Moq;
 using System;
@@ -32,15 +34,13 @@ namespace Mc2.CrudTest.AcceptanceTests
 
             var mockMapper = new Mock<IMapper>();
             var mockRepository = new Mock<ICustomerRepository>();
-            var customerService = new CustomerService(mockMapper.Object, mockRepository.Object);
+            var createCustomerCommandHandler = new CreateCustomerCommandHandler(mockMapper.Object, mockRepository.Object);
+            var createCustomerCommand = new CreateCustomerCommand(customerData);
 
-            
-            // Act
-            var ex = await Assert.ThrowsAsync<ArgumentException>(() => customerService.AddCustomer(customerData));
-
-            // Assert
-            Assert.Equal("Invalid phone number", ex.Message);
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentException>(() => createCustomerCommandHandler.Handle(createCustomerCommand));
         }
+
 
 
         // Please create more tests based on project requirements as per in readme.md

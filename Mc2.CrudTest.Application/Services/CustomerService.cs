@@ -1,7 +1,10 @@
 ﻿using AutoMapper;
+using Mc2.CrudTest.Application.CommandHandlers;
+using Mc2.CrudTest.Application.Commands;
 using Mc2.CrudTest.Application.DTO;
 using Mc2.CrudTest.Application.Interfaces;
-using Mc2.CrudTest.Application.Repositories;
+using Mc2.CrudTest.Application.Queries;
+using Mc2.CrudTest.Application.QueryHandlers;
 using Mc2.CrudTest.Domain.Entities;
 using Mc2.CrudTest.Shared.Utilities;
 
@@ -11,162 +14,54 @@ namespace Mc2.CrudTest.Application.Services
     {
         private readonly ICustomerRepository _customerRepository;
         private readonly IMapper _mapper;
-        
+        private readonly ICommandHandler<CreateCustomerCommand> _createCustomerCommandHandler;
+        private readonly ICommandHandler<UpdateCustomerCommand> _updateCustomerCommandHandler;
+        private readonly ICommandHandler<DeleteCustomerCommand> _deleteCustomerCommandHandler;
+        private readonly IQueryHandler<GetCustomerByIdQuery, CustomerDTO> _getCustomerByIdQueryHandler;
+        private readonly IQueryHandler<GetAllCustomersQuery, IEnumerable<CustomerDTO>> _getAllCustomersQueryHandler;
 
-        public CustomerService(IMapper mapper , ICustomerRepository customerRepository)
+        public CustomerService(
+            IMapper mapper,
+            ICustomerRepository customerRepository,
+            ICommandHandler<CreateCustomerCommand> createCustomerCommandHandler,
+            ICommandHandler<UpdateCustomerCommand> updateCustomerCommandHandler,
+            ICommandHandler<DeleteCustomerCommand> deleteCustomerCommandHandler,
+            IQueryHandler<GetCustomerByIdQuery, CustomerDTO> getCustomerByIdQueryHandler,
+            IQueryHandler<GetAllCustomersQuery, IEnumerable<CustomerDTO>> getAllCustomersQueryHandler)
         {
             _customerRepository = customerRepository;
             _mapper = mapper;
+            _createCustomerCommandHandler = createCustomerCommandHandler;
+            _updateCustomerCommandHandler = updateCustomerCommandHandler;
+            _deleteCustomerCommandHandler = deleteCustomerCommandHandler;
+            _getCustomerByIdQueryHandler = getCustomerByIdQueryHandler;
+            _getAllCustomersQueryHandler = getAllCustomersQueryHandler;
         }
 
-        public async Task AddCustomer(CustomerDTO customerDto)
+        public async Task<CustomerDTO> Handle(GetCustomerByIdQuery query)
         {
-            if (customerDto == null)
-            {
-                throw new ArgumentNullException(nameof(customerDto));
-            }
-
-            // Validate the phone number
-            if (!ValidationUtility.IsValidPhoneNumber(customerDto.PhoneNumber))
-            {
-                throw new ArgumentException("Invalid phone number");
-            }
-
-            // Validate the email
-            if (!ValidationUtility.IsValidEmail(customerDto.Email))
-            {
-                throw new ArgumentException("Invalid email");
-            }
-
-            // Check if the email is unique
-            if (!await _customerRepository.IsEmailUniqueAsync(customerDto.Email))
-            {
-                throw new ArgumentException("Email already exists");
-            }
-
-            // Validate the bank account number
-            if (!ValidationUtility.IsValidBankAccountNumber(customerDto.BankAccountNumber))
-            {
-                throw new ArgumentException("Invalid bank account number");
-            }
-
-
-               var customer = _mapper.Map<Customer>(customerDto);
-               await _customerRepository.AddAsync(customer);
-            
+            return await _getCustomerByIdQueryHandler.Handle(query);
         }
 
-      
-
-        public async Task DeleteCustomer(int id)
+        public async Task<IEnumerable<CustomerDTO>> Handle(GetAllCustomersQuery query)
         {
-            try
-            {
-                await _customerRepository.DeleteAsync(id);
-            }
-            catch (ArgumentException ex)
-            {
-                throw new ArgumentException($"Could not delete customer with ID {id}.", ex);
-            }
+            return await _getAllCustomersQueryHandler.Handle(query);
         }
 
-        public async Task<IEnumerable<CustomerDTO>> GetAllCustomers()
+        public async Task Handle(CreateCustomerCommand command)
         {
-            try
-            {
-                var customers = await _customerRepository.GetAllAsync();
-
-                if (customers == null)
-                {
-                    throw new Exception("No customers found");
-                }
-
-                var config = new MapperConfiguration(cfg =>
-                {
-                    cfg.CreateMap<Customer, CustomerDTO>();
-                });
-
-                IMapper mapper = config.CreateMapper();
-                var customerDtos = mapper.Map<IEnumerable<CustomerDTO>>(customers);
-
-                return customerDtos;
-            }
-            catch (Exception ex)
-            {
-                // Log the exception
-                // Handle the exception gracefully, for example, by returning a default value or an error message
-                throw ex;
-            }
+            await _createCustomerCommandHandler.Handle(command);
         }
 
-
-        public async Task<CustomerDTO> GetCustomerById(int id)
+        public async Task Handle(UpdateCustomerCommand command)
         {
-            var customer = await _customerRepository.GetByIdAsync(id);
-
-            if (customer == null)
-            {
-                return null;
-            }
-
-            var customerDto = new CustomerDTO
-            {
-                Id = customer.Id,
-                FirstName = customer.FirstName,
-                LastName = customer.LastName,
-                DateOfBirth = customer.DateOfBirth,
-                PhoneNumber = customer.PhoneNumber,
-                Email = customer.Email,
-                BankAccountNumber = customer.BankAccountNumber
-            };
-
-            return customerDto;
+            await _updateCustomerCommandHandler.Handle(command);
         }
 
-        public async Task UpdateCustomer(int id, CustomerDTO customerDto)
+        public async Task Handle(DeleteCustomerCommand command)
         {
-            if (customerDto == null)
-            {
-                throw new ArgumentNullException(nameof(customerDto));
-            }
-
-            var customer = await _customerRepository.GetByIdAsync(id);
-            if (customer == null)
-            {
-                throw new ArgumentException($"Customer with ID {id} not found");
-            }
-
-            // Validate the phone number
-            if (!ValidationUtility.IsValidPhoneNumber(customerDto.PhoneNumber))
-            {
-                throw new ArgumentException("Invalid phone number");
-            }
-
-            // Validate the email
-            if (!ValidationUtility.IsValidEmail(customerDto.Email))
-            {
-                throw new ArgumentException("Invalid email");
-            }
-
-          
-
-            // Validate the bank account number
-            if (!ValidationUtility.IsValidBankAccountNumber(customerDto.BankAccountNumber))
-            {
-                throw new ArgumentException("Invalid bank account number");
-            }
-
-            // Update the customer properties
-            customer.FirstName = customerDto.FirstName;
-            customer.LastName = customerDto.LastName;
-            customer.DateOfBirth = customerDto.DateOfBirth;
-            customer.PhoneNumber = customerDto.PhoneNumber;
-            customer.Email = customerDto.Email;
-            customer.BankAccountNumber = customerDto.BankAccountNumber;
-
-            // Save the changes
-            await _customerRepository.UpdateAsync(customer);
+            await _deleteCustomerCommandHandler.Handle(command);
         }
-
     }
+
 }
