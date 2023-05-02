@@ -3,7 +3,7 @@
   <PropertyGroup Label="Globals">
     <ProjectVersion>2.1</ProjectVersion>
     <DockerTargetOS>Windows</DockerTargetOS>
-    <ProjectGuid>89a2968a-035a-4a82-ac5f-15529b8b0448</ProjectGuid>
+    <ProjectGuid>13435482-b976-4001-aa3f-0ae37b754024</ProjectGuid>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
     <DockerServiceUrl>{Scheme}://{ServiceIPAddress}{ServicePort}/swagger</DockerServiceUrl>
     <DockerServiceName>mc2.crudtest.presentation.server</DockerServiceName>
