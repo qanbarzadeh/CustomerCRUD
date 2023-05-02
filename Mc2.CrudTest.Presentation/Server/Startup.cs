@@ -6,19 +6,22 @@ using Microsoft.Extensions.Hosting;
 using AutoMapper;
 using Mc2.CrudTest.Application.Mapping;
 using Mc2.CrudTest.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.Swagger;
 using Mc2.CrudTest.Infrastructure.Repositories;
 using Mc2.CrudTest.Application.Interfaces;
 using Mc2.CrudTest.Application.Services;
-using Mc2.CrudTest.Presentation.Server.Extensions;
 using Mc2.CrudTest.Application.CommandHandlers;
 using Mc2.CrudTest.Application.Commands;
 using Mc2.CrudTest.Application.DTO;
 using Mc2.CrudTest.Application.Queries;
 using Mc2.CrudTest.Application.QueryHandlers;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using System;
+using Mc2.CrudTest.Domain.Entities;
+using Mc2.CrudTest.Presentation.Server.Filter;
 
 namespace Mc2.CrudTest.Presentation.Server
 {
@@ -30,10 +33,10 @@ namespace Mc2.CrudTest.Presentation.Server
         }
 
         public IConfiguration Configuration { get; }
-
-
         public void ConfigureServices(IServiceCollection services)
         {
+
+
             var mapperConfig = new MapperConfiguration(mc =>
             {
                 mc.AddProfile(new MappingProfile());
@@ -41,24 +44,37 @@ namespace Mc2.CrudTest.Presentation.Server
             IMapper mapper = mapperConfig.CreateMapper();
             services.AddSingleton(mapper);
 
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseInMemoryDatabase("MyInMemoryDatabase"));
+            services.AddDbContext<ApplicationDbContext>((serviceProvider, optionsBuilder) =>
+            {
+                optionsBuilder.UseSqlServer(
+                    Configuration.GetConnectionString("DefaultConnection"),
+                    b => b.MigrationsAssembly("Mc2.CrudTest.Presentation.Server")
+                );
+            });
 
-            services.AddScoped<ICustomerRepository, CustomerRepository>();
-
-            services.AddScoped<ICommandHandler<CreateCustomerCommand>, CreateCustomerCommandHandler>();
-            services.AddScoped<ICommandHandler<UpdateCustomerCommand>, UpdateCustomerCommandHandler>();
-            services.AddScoped<ICommandHandler<DeleteCustomerCommand>, DeleteCustomerCommandHandler>();
 
             services.AddScoped<ICustomerService, CustomerService>();
-
+            services.AddScoped<ICustomerRepository, CustomerRepository>();
+            services.AddScoped<ICommandHandler<CreateCustomerCommand>, CreateCustomerCommandHandler>();
+            services.AddScoped<ICommandHandler<UpdateCustomerCommand>, UpdateCustomerCommandHandler>();
+            services.AddScoped<ICommandHandler<DeleteCustomerCommand>, DeleteCustomerCommandHandler>();            
             services.AddScoped<IQueryHandler<GetCustomerByIdQuery, CustomerDTO>, GetCustomerByIdQueryHandler>();
             services.AddScoped<IQueryHandler<GetAllCustomersQuery, IEnumerable<CustomerDTO>>, GetAllCustomersQueryHandler>();
 
-            services.AddSwaggerGen(c =>
+            //services.AddSwaggerGen(c =>
+            //{
+            //    c.SwaggerDoc("v1", new OpenApiInfo { Title = "CustomerCRUD", Version = "v1" });
+
+            //});
+
+
+            services.AddSwaggerGen(options =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "CustomerCRUD", Version = "v1" });
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+                options.SchemaFilter<ExcludeIdPropertySchemaFilter>();
             });
+
+
 
             services.AddControllersWithViews();
             services.AddRazorPages();

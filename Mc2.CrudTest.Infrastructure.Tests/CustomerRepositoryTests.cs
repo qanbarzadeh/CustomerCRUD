@@ -11,13 +11,12 @@ namespace Mc2.CrudTest.Infrastructure.Tests
 
         public CustomerRepositoryTests()
         {
-            // Generate a unique in-memory database name for each test
+            // Generate a unique database name for each test
             string databaseName = Guid.NewGuid().ToString();
 
             _options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: databaseName)
+                .UseSqlServer($"Server=(localdb)\\mssqllocaldb;Database=Test_{databaseName};Trusted_Connection=True;MultipleActiveResultSets=true")
                 .Options;
-            
         }
         [Fact]
         public async Task GetAllAsync_ReturnsAllCustomers()
