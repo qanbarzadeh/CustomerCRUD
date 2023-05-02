@@ -24,7 +24,7 @@ The application comes with a test project, `Mc2.CrudTest.Application.Tests`, tha
 ## Example Bank Account Number
 
 The bank account number format used for validation.Here are some examples to use in Swagger fo testing :
- -GB29NWBK60161331926819
- -GB29NWBK60161331926819
- -FR1420041010050500013M02606
- -DE89370400440532013000
+ - GB29NWBK60161331926819
+ - GB29NWBK60161331926819
+ - FR1420041010050500013M02606
+ - DE89370400440532013000
