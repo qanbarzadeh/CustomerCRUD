@@ -35,7 +35,7 @@ Here's an example JSON object that can be used as a request for Swagger:
 ```json
 {  
   "firstname": "Ali",
-  "lastname": "qanbarzadeh",
+  "lastname": "Qanbarzadeh",
   "dateOfBirth": "2023-04-30T17:54:39.708Z",
   "phoneNumber": "+60173771596",
   "email": "ghxalireza@gmail.com",
