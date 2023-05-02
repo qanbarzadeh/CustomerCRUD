@@ -28,3 +28,17 @@ The bank account number format used for validation.Here are some examples to use
  - GB29NWBK60161331926819
  - FR1420041010050500013M02606
  - DE89370400440532013000
+
+
+Here's an example JSON object that can be used as a request for Swagger:
+
+```json
+{
+  "id": 1,
+  "firstname": "aliresza",
+  "lastname": "qanabr",
+  "dateOfBirth": "2023-04-30T17:54:39.708Z",
+  "phoneNumber": "+60173771596",
+  "email": "ghxalireza@gmail.com",
+  "bankAccountNumber": "DE89370400440532013000"
+}
