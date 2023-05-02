@@ -1,47 +1,26 @@
-# CRUD Code Test 
+# Customer CRUD Application
 
-Please read each note very carefully!
-Feel free to add/change project structure to a clean architecture to your view.
-and if you are not able to work on FrontEnd project, you can add a Swagger UI
-in a new Front project.
+This is a Customer CRUD (Create, Read, Update, Delete) application built using Clean Architecture and following the TDD (Test-Driven Development) approach. It also uses CQRS (Command Query Responsibility Segregation) pattern and validation for bank account number.
 
-Create a simple CRUD application with ASP NET that implements the below model:
-```
-Customer {
-	Firstname
-	Lastname
-	DateOfBirth
-	PhoneNumber
-	Email
-	BankAccountNumber
-}
-```
-## Practices and patterns (Must):
+## Getting Started
 
-- [TDD](https://docs.microsoft.com/en-us/visualstudio/test/quick-start-test-driven-development-with-test-explorer?view=vs-2022)
-- [DDD](https://en.wikipedia.org/wiki/Domain-driven_design)
-- [BDD](https://en.wikipedia.org/wiki/Behavior-driven_development)
-- [Clean architecture](https://github.com/jasontaylordev/CleanArchitecture)
-- [CQRS](https://en.wikipedia.org/wiki/Command%E2%80%93query_separation#Command_query_responsibility_separation) pattern ([Event sourcing](https://en.wikipedia.org/wiki/Domain-driven_design#Event_sourcing)).
-- Clean git commits that shows your work progress.
+To get started with the project, clone the repository and open the solution file in Visual Studio 2019 or later. 
 
-### Validations (Must)
+### Prerequisites
 
-- During Create; validate the phone number to be a valid *mobile* number only (You can use [Google LibPhoneNumber](https://github.com/google/libphonenumber) to validate number at the backend).
+- .NET 6.0 SDK or later
+- Visual Studio 2019 or later
 
-- A Valid email and a valid bank account number must be checked before submitting the form.
+### Installing
 
-- Customers must be unique in database: By `Firstname`, `Lastname` and `DateOfBirth`.
+1. Clone the repository
+2. Open the solution file in Visual Studio
+3. Build the solution to restore NuGet packages
 
-- Email must be unique in the database.
+## Running the Tests
 
-### Storage (Must)
+The application comes with a test project, `Mc2.CrudTest.Application.Tests`, that contains unit tests for the business logic. To run the tests, simply run the test project.
 
-- Store the phone number in a database with minimized space storage (choose `varchar`/`string`, or `ulong` whichever store less space).
+## Example Bank Account Number
 
-### Delivery (Must)
-- Please clone this repository in a new github repository in private mode and share with ID: `mason-chase` in private mode on github.com, make sure you do not erase my commits and then create a [pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) (code review).
-
-## Nice to do:
-- Blazor Web.
-- Docker-compose project that loads database service automatically which `docker-compose up`
+The bank account number format used for validation is `GB29NWBK60161331926819`. Please note that this is just an example and should not be used as a real bank account number.
