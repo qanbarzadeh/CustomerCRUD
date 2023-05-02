@@ -31,11 +31,13 @@ namespace Mc2.CrudTest.Application.Tests
             });
             var mapper = mapperConfiguration.CreateMapper();
             _mapper = mapper;
-
-
-            _dbContextOptions = new DbContextOptionsBuilder<Infrastructure.Data.ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: "TestDatabase")
+            _dbContextOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
+                 .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TestDatabase;Trusted_Connection=True;")
                 .Options;
+
+
+
+
         }
         [Fact]
         public async Task GetCustomerById_WithValidId_ReturnsCustomerDto()

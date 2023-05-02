@@ -2,22 +2,61 @@
 using Mc2.CrudTest.Infrastructure.Data;
 using Mc2.CrudTest.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace Mc2.CrudTest.Infrastructure.Tests
 {
     public class CustomerRepositoryTests
     {
+
+        private readonly IConfiguration _config;
         private readonly DbContextOptions<ApplicationDbContext> _options;
 
         public CustomerRepositoryTests()
         {
-            // Generate a unique database name for each test
-            string databaseName = Guid.NewGuid().ToString();
+            _config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.Development.json")
+                .Build();
 
+            var connectionString = _config.GetConnectionString("DefaultConnection");
             _options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseSqlServer($"Server=(localdb)\\mssqllocaldb;Database=Test_{databaseName};Trusted_Connection=True;MultipleActiveResultSets=true")
+                .UseSqlServer(connectionString)
                 .Options;
         }
+        [Fact]
+        public async Task AddAsync_WithValidCustomer_ShouldAddCustomerToDatabase()
+        {
+            // Arrange
+
+            var customer = new Customer(
+                firstname: "Sara",
+                lastname: "White",
+                dateOfBirth: new DateTime(1990, 1, 1),
+                phoneNumber: "+60173771596",
+                email: "saraw@gmail.com",
+                bankAccountNumber: "NL91ABNA0417164300"); 
+            
+            // Act and Assert
+            using (var context = new ApplicationDbContext(_options))
+            {
+                var customerRepository = new CustomerRepository(context);
+                // Act
+                await customerRepository.AddAsync(customer);
+                await context.SaveChangesAsync();
+
+                // Assert
+                var savedCustomer = await customerRepository.GetByIdAsync(customer.Id);
+                Assert.NotNull(savedCustomer);
+                Assert.Equal(customer.FirstName, savedCustomer.FirstName);
+                Assert.Equal(customer.LastName, savedCustomer.LastName);
+                Assert.Equal(customer.DateOfBirth, savedCustomer.DateOfBirth);
+                Assert.Equal(customer.PhoneNumber, savedCustomer.PhoneNumber);
+                Assert.Equal(customer.Email, savedCustomer.Email);
+                Assert.Equal(customer.BankAccountNumber, savedCustomer.BankAccountNumber);
+            }
+        }
+
+
         [Fact]
         public async Task GetAllAsync_ReturnsAllCustomers()
         {
@@ -70,23 +109,21 @@ namespace Mc2.CrudTest.Infrastructure.Tests
 
 
         [Fact]
-        public async Task AddAsync_WithValidCustomer_ShouldAddCustomerToDatabase()
+        public async Task AddAndRetrieveCustomer_WithValidCustomer_ShouldAddAndRetrieveCustomerFromDatabase()
         {
             // Arrange
-            int id = 1; 
             var customer = new Customer(
-                firstname: "Sara",
-                lastname: "White",
-                dateOfBirth: new DateTime(1990, 1, 1),
-                phoneNumber: "123asdfas",
-                email: "saraw@gmail.com",
-                bankAccountNumber: "123-456-789")
-            {
-                Id = id
-            };
+                firstname: "John",
+                lastname: "Doe",
+                dateOfBirth: new DateTime(1980, 1, 1),
+                phoneNumber: "123-456-7890",
+                email: "johndoe@example.com",
+                bankAccountNumber: "123-456-789");
+
             using (var context = new ApplicationDbContext(_options))
             {
-                var customerRepository = new CustomerRepository(context);                                                
+                var customerRepository = new CustomerRepository(context);
+
                 // Act
                 await customerRepository.AddAsync(customer);
                 await context.SaveChangesAsync();
@@ -95,9 +132,19 @@ namespace Mc2.CrudTest.Infrastructure.Tests
             // Assert
             using (var context = new ApplicationDbContext(_options))
             {
-                Assert.Equal(1, await context.Customers.CountAsync());
+                var customerRepository = new CustomerRepository(context);
+                var retrievedCustomer = await customerRepository.GetByIdAsync(customer.Id);
+
+                Assert.NotNull(retrievedCustomer);
+                Assert.Equal(customer.FirstName, retrievedCustomer.FirstName);
+                Assert.Equal(customer.LastName, retrievedCustomer.LastName);
+                Assert.Equal(customer.DateOfBirth, retrievedCustomer.DateOfBirth);
+                Assert.Equal(customer.PhoneNumber, retrievedCustomer.PhoneNumber);
+                Assert.Equal(customer.Email, retrievedCustomer.Email);
+                Assert.Equal(customer.BankAccountNumber, retrievedCustomer.BankAccountNumber);
             }
         }
+
 
         [Fact]
         public async Task DeleteAsync_WithValidCustomer_ShouldDeleteCustomerFromDatabase()
