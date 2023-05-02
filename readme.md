@@ -33,8 +33,7 @@ The bank account number format used for validation.Here are some examples to use
 Here's an example JSON object that can be used as a request for Swagger:
 
 ```json
-{
-  "id": 1,
+{  
   "firstname": "Ali",
   "lastname": "qanbarzadeh",
   "dateOfBirth": "2023-04-30T17:54:39.708Z",
