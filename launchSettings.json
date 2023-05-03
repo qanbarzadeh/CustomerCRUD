@@ -3,8 +3,12 @@
     "Docker Compose": {
       "commandName": "DockerCompose",
       "commandVersion": "1.0",
+      "composeLaunchAction": "LaunchBrowser",
+      "composeLaunchServiceName": "mc2.crudtest.presentation.server",
+      "composeLaunchUrl": "{Scheme}://{ServiceIPAddress}{ServicePort}/swagger",
       "serviceActions": {
-        "mc2.crudtest.presentation.server": "StartDebugging"
+        "mc2.crudtest.presentation.server": "StartDebugging",
+        "db": "StartWithoutDebugging"
       }
     }
   }
