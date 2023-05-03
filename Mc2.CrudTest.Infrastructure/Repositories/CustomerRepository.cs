@@ -2,7 +2,6 @@
 using Mc2.CrudTest.Domain.Entities;
 using Mc2.CrudTest.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Mc2.CrudTest.Infrastructure.Repositories
 {

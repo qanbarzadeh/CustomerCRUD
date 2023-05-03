@@ -17,15 +17,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mc2.CrudTest.Application", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mc2.CrudTest.Infrastructure", "Mc2.CrudTest.Infrastructure\Mc2.CrudTest.Infrastructure.csproj", "{260AFCA0-8223-40EF-B599-522FD230C1A2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mc2.CrudTest.Application.Tests", "Mc2.CrudTest.Application.Tests\Mc2.CrudTest.Application.Tests.csproj", "{16B0CF0C-731B-415B-8984-A3422BDC25C6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mc2.CrudTest.Application.Tests", "Mc2.CrudTest.Application.Tests\Mc2.CrudTest.Application.Tests.csproj", "{16B0CF0C-731B-415B-8984-A3422BDC25C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mc2.CrudTest.Infrastructure.Tests", "Mc2.CrudTest.Infrastructure.Tests\Mc2.CrudTest.Infrastructure.Tests.csproj", "{BD9DABEB-D263-4E86-8309-A4B338C782AF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mc2.CrudTest.Infrastructure.Tests", "Mc2.CrudTest.Infrastructure.Tests\Mc2.CrudTest.Infrastructure.Tests.csproj", "{BD9DABEB-D263-4E86-8309-A4B338C782AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mc2.CrudTest.Domain.Tests", "Mc2.CrudTest.Domain.Tests\Mc2.CrudTest.Domain.Tests.csproj", "{8015D3D8-762F-4168-AD89-54ABE14AA69B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mc2.CrudTest.Domain.Tests", "Mc2.CrudTest.Domain.Tests\Mc2.CrudTest.Domain.Tests.csproj", "{8015D3D8-762F-4168-AD89-54ABE14AA69B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Src", "Src", "{B94C8701-73E6-4B82-9AE8-D31838A1C0C3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{10629131-A204-4A28-8B7D-4F8D5D301AB8}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{13435482-B976-4001-AA3F-0AE37B754024}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -73,6 +75,10 @@ Global
 		{8015D3D8-762F-4168-AD89-54ABE14AA69B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8015D3D8-762F-4168-AD89-54ABE14AA69B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8015D3D8-762F-4168-AD89-54ABE14AA69B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13435482-B976-4001-AA3F-0AE37B754024}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13435482-B976-4001-AA3F-0AE37B754024}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13435482-B976-4001-AA3F-0AE37B754024}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13435482-B976-4001-AA3F-0AE37B754024}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
