@@ -13,11 +13,12 @@ using Mc2.CrudTest.Presentation.Server.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-
-
+using TechTalk.SpecFlow;
 
 namespace Mc2.CrudTest.Application.Tests
 {
+
+
     public class CustomerServiceTests
     {
         private readonly IMapper _mapper;
@@ -265,7 +266,7 @@ namespace Mc2.CrudTest.Application.Tests
               bankAccountNumber: "123-456-789")
             {
                 Id = 1
-            }; 
+            };
             var config = new MapperConfiguration(cfg => cfg.AddProfile(new MappingProfile()));
             var mapper = config.CreateMapper();
 
@@ -294,4 +295,5 @@ namespace Mc2.CrudTest.Application.Tests
 
         }
     }
+
 }
