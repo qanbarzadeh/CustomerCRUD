@@ -19,6 +19,7 @@ using Mc2.CrudTest.Application.DTO;
 using Mc2.CrudTest.Application.Queries;
 using Mc2.CrudTest.Application.QueryHandlers;
 using System.Collections.Generic;
+using Microsoft.Extensions.Options;
 
 namespace Mc2.CrudTest.Presentation.Server
 {
@@ -58,6 +59,7 @@ namespace Mc2.CrudTest.Presentation.Server
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "CustomerCRUD", Version = "v1" });
+                c.IgnoreObsoleteProperties();
             });
 
             services.AddControllersWithViews();
