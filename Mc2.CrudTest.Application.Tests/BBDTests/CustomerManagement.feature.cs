@@ -10,7 +10,7 @@
 // ------------------------------------------------------------------------------
 #region Designer generated code
 #pragma warning disable
-namespace Mc2.CrudTest.Application.Tests.Tests
+namespace Mc2.CrudTest.Application.Tests.BBDTests
 {
     using TechTalk.SpecFlow;
     using System;
@@ -40,7 +40,7 @@ namespace Mc2.CrudTest.Application.Tests.Tests
         public static void FeatureSetup()
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
-            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Tests", "Customer Management", "  As a user\r\n  I want to be able to create customers with valid information\r\n  So" +
+            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "BBDTests", "Customer Management", "  As a user\r\n  I want to be able to create customers with valid information\r\n  So" +
                     " that I can manage my customer records", ProgrammingLanguage.CSharp, featureTags);
             testRunner.OnFeatureStart(featureInfo);
         }
