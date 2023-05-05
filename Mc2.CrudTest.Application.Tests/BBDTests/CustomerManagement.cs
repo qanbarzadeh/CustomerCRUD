@@ -8,7 +8,6 @@ using Mc2.CrudTest.Domain.Entities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using TechTalk.SpecFlow;
-using Xunit;
 using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace Mc2.CrudTest.Application.Tests.Tests
@@ -34,15 +33,15 @@ namespace Mc2.CrudTest.Application.Tests.Tests
             // Initialize Mock<ICustomerRepository> instance
             _mockCustomerRepository = new Mock<ICustomerRepository>();
         }
-        [TestMethod]
-        [TestCategory("SpecFlow")]
+       
+    
         [Given(@"I have entered valid customer information")]        
-        public void GivenIHaveEnteredValidCustomerInformation()
+        public async Task GivenIHaveEnteredValidCustomerInformation()
         {
             _customerDto = CreateCustomerDto();
         }
-        [TestMethod]
-        [TestCategory("SpecFlow")]        
+        
+        
         [When(@"I request to create a new customer")]
         public async Task WhenIRequestToCreateANewCustomer()
         {
@@ -55,10 +54,10 @@ namespace Mc2.CrudTest.Application.Tests.Tests
 
             await commandHandler.Handle(command);
         }
-        [TestMethod]
-        [TestCategory("SpecFlow")]        
+      
+        
         [Then(@"the new customer should be created and returned")]
-        public void ThenTheNewCustomerShouldBeCreatedAndReturned()
+        public async Task ThenTheNewCustomerShouldBeCreatedAndReturned()
         {
             Assert.IsNotNull(_createdCustomer);
             Assert.AreEqual(_customerDto.FirstName, _createdCustomer.FirstName);
